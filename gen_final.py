@@ -403,19 +403,6 @@ def build_html(V, H, latest_date=''):
     H2.append(make_ins('💤', '无人区', '量价双杀，等待催化剂', nobody, '#64748b', len(nobody)))
     H2.append('</div>')
     
-    # 分布栏
-    def make_al(emoji, label, items):
-        names = ' · '.join([v['name'] for v in items[:6]])
-        more = f' 等{len(items)}个' if len(items) > 6 else ''
-        return f'<div class="al"><span class="al-dot" style="background:{emoji}"></span>{label}: {names}{more}</div>'
-    
-    H2.append('<div class="al-bar">')
-    H2.append(make_al('#ef4444', '价格高位', hi_p))
-    H2.append(make_al('#22c55e', '价格低位', lo_p))
-    H2.append(make_al('#ef4444', '持仓高位', hi_o))
-    H2.append(make_al('#22c55e', '持仓低位', lo_o))
-    H2.append('</div>')
-    
     # ── 历史分位矩阵表格 ──
     H2.append('<table><thead><tr>')
     H2.append('<th class="th-corner"><div class="corner-top"><span>→</span> 持仓</div><div class="corner-div">—</div><div class="corner-bot">价格 <span>↓</span></div></th>')
