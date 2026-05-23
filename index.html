@@ -1,84 +1,84 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="robots" content="noai, noimageai"><meta name="ai-content-detection" content="no-ai-training"><meta name="google-site-verification" content="no-archive"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>期货双维分类</title><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script><style>*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0b0f19;color:#e2e8f0;padding:28px 32px;min-height:100vh}
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="robots" content="noai, noimageai"><meta name="ai-content-detection" content="no-ai-training"><meta name="google-site-verification" content="no-archive"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>期货双维分类</title><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script><style>:root{color-scheme:light dark;--bg:#0b0f19;--bg2:#111827;--bg3:#0f172a;--border:#1e293b;--text:#e2e8f0;--text2:#cbd5e1;--text3:#94a3b8;--text4:#64748b;--text5:#475569;--tag-bg:#1e293b;--tag-border:#334155;--tag-text:#cbd5e1;--tag-hover-bg:#2563eb;--tag-hover-border:#3b82f6;--ins-border:#1e293b;--table-shadow:0 4px 30px rgba(0,0,0,.4),0 0 0 1px #1e293b;--modal-bg:rgba(0,0,0,.75);--md-bg:#0f172a;--fn-bg:#0f172a;--th-text:#cbd5e1;--th-border:#1e293b;--td-empty-bg:#0b0f19;--td-empty-color:#334155;--badge-bg4:rgba(148,163,184,.08);--wl-empty:#334155;--no-chart-bg:#111827;--no-chart-color:#475569}@media(prefers-color-scheme:light){:root{--bg:#f1f5f9;--bg2:#ffffff;--bg3:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text2:#334155;--text3:#475569;--text4:#64748b;--text5:#94a3b8;--tag-bg:#f1f5f9;--tag-border:#cbd5e1;--tag-text:#334155;--tag-hover-bg:#3b82f6;--tag-hover-border:#3b82f6;--ins-border:#e2e8f0;--table-shadow:0 4px 24px rgba(0,0,0,.06),0 0 0 1px #e2e8f0;--modal-bg:rgba(0,0,0,.4);--md-bg:#ffffff;--fn-bg:#f8fafc;--th-text:#0f172a;--th-border:#cbd5e1;--td-empty-bg:#f1f5f9;--td-empty-color:#94a3b8;--badge-bg4:rgba(148,163,184,.15);--wl-empty:#94a3b8;--no-chart-bg:#f8fafc;--no-chart-color:#94a3b8}}*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);padding:28px 32px;min-height:100vh}
 .wrap{max-width:1620px;margin:0 auto}
 h1{font-size:24px;font-weight:700;margin-bottom:6px;letter-spacing:-.5px}
 h1 span{background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.sub{color:#64748b;font-size:13px;margin-bottom:28px}
+.sub{color:var(--text4);font-size:13px;margin-bottom:28px}
 .badges{display:flex;gap:10px;margin-bottom:32px}
 .badge{font-size:12px;padding:6px 14px;border-radius:20px;font-weight:500;border:1px solid}
 .bg1{background:rgba(34,197,94,.1);color:#86efac;border-color:rgba(34,197,94,.2)}
 .bg2{background:rgba(245,158,11,.1);color:#fcd34d;border-color:rgba(245,158,11,.2)}
 .bg3{background:rgba(59,130,246,.1);color:#93c5fd;border-color:rgba(59,130,246,.2)}
-.bg4{background:rgba(148,163,184,.08);color:#94a3b8;border-color:rgba(148,163,184,.15)}
+.bg4{background:var(--badge-bg4);color:var(--text3);border-color:rgba(148,163,184,.2)}
 
 /* Insights */
-.ins{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-bottom:24px;border-radius:14px;overflow:hidden;border:1px solid #1e293b}
-.ins-card{background:#111827;padding:18px 20px;border-right:1px solid #1e293b;transition:.2s}
+.ins{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-bottom:24px;border-radius:14px;overflow:hidden;border:1px solid var(--ins-border)}
+.ins-card{background:var(--bg2);padding:18px 20px;border-right:1px solid var(--ins-border);transition:.2s}
 .ins-card:last-child{border-right:none}
-.ins-card:hover{background:#1a2235}
+.ins-card:hover{background:var(--bg3)}
 .ins-head{font-size:14px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px}
-.ins-head span{font-size:11px;background:#1e293b;padding:1px 8px;border-radius:10px;color:#94a3b8;font-weight:400}
-.ins-desc{font-size:11px;color:#94a3b8;margin-bottom:10px;line-height:1.5}
-.ins-names{font-size:10px;color:#64748b;line-height:1.5}
+.ins-head span{font-size:11px;background:var(--tag-bg);padding:1px 8px;border-radius:10px;color:var(--text3);font-weight:400}
+.ins-desc{font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.5}
+.ins-names{font-size:10px;color:var(--text4);line-height:1.5}
 
 /* Alerts */
 .al-bar{display:flex;gap:16px;margin-bottom:24px}
-.al{flex:1;background:#111827;border:1px solid #1e293b;border-radius:10px;padding:12px 16px;font-size:11px;color:#94a3b8;line-height:1.6}
+.al{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:11px;color:var(--text3);line-height:1.6}
 .al-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
 
 /* Table */
-table{width:100%;border-collapse:collapse;border-radius:14px;overflow:hidden;box-shadow:0 4px 30px rgba(0,0,0,.4),0 0 0 1px #1e293b;font-size:12px}
-th{background:#0f172a;color:#cbd5e1;padding:16px 10px;font-size:12px;font-weight:600;text-align:center;border-bottom:2px solid #1e293b}
+table{width:100%;border-collapse:collapse;border-radius:14px;overflow:hidden;box-shadow:var(--table-shadow);font-size:12px}
+th{background:var(--bg3);color:var(--th-text);padding:16px 10px;font-size:12px;font-weight:600;text-align:center;border-bottom:2px solid var(--border)}
 .th-corner{width:76px;line-height:1.6}
 .corner-top{display:flex;align-items:center;justify-content:center;gap:4px;font-size:12px}
 .corner-top span{font-size:18px}
-.corner-div{font-size:9px;color:#475569;margin:3px 0}
+.corner-div{font-size:9px;color:var(--text5);margin:3px 0}
 .corner-bot{display:flex;align-items:center;justify-content:center;gap:4px;font-size:12px}
 .corner-bot span{font-size:18px}
 .th-emoji{font-size:18px}
 .th-sub{font-weight:400;opacity:.6;font-size:10px}
-td{border:1px solid #1e293b}
-.td-empty{background:#0b0f19;color:#334155;text-align:center;padding:24px;font-size:13px}
-.td-cell{padding:8px 6px;vertical-align:top;background:#0f172a}
-.td-label{text-align:center;font-size:13px;font-weight:700;border:1px solid #1e293b}
+td{border:1px solid var(--border)}
+.td-empty{background:var(--td-empty-bg);color:var(--td-empty-color)};text-align:center;padding:24px;font-size:13px}
+.td-cell{padding:8px 6px;vertical-align:top;background:var(--bg3)}
+.td-label{text-align:center;font-size:13px;font-weight:700;border:1px solid var(--border)}
 .td-emoji{font-size:18px}
-.td-sub{color:#64748b;font-weight:400;font-size:10px}
-.tag{display:inline-block;background:#1e293b;border:1px solid #334155;border-radius:6px;padding:5px 10px;margin:2px;font-size:11px;cursor:pointer;transition:all .15s;white-space:nowrap;font-weight:500;color:#cbd5e1}
-.tag:hover{background:#2563eb;border-color:#3b82f6;color:#fff;transform:translateY(-1px);box-shadow:0 4px 12px rgba(59,130,246,.25)}
+.td-sub{color:var(--text4);font-weight:400;font-size:10px}
+.tag{display:inline-block;background:var(--tag-bg);border:1px solid var(--tag-border);border-radius:6px;padding:5px 10px;margin:2px;font-size:11px;cursor:pointer;transition:all .15s;white-space:nowrap;font-weight:500;color:var(--tag-text)}
+.tag:hover{background:var(--tag-hover-bg);border-color:var(--tag-hover-border);color:#fff;transform:translateY(-1px);box-shadow:0 4px 12px rgba(59,130,246,.25)}
 .tag.ch{border-color:#f59e0b}
 .tag.ch:hover{background:#d97706;border-color:#f59e0b}
 
 /* Footnote */
-.fn{margin-top:20px;padding:14px 18px;background:#0f172a;border:1px solid #1e293b;border-radius:10px;font-size:11px;color:#475569}
+.fn{margin-top:20px;padding:14px 18px;background:var(--fn-bg);border:1px solid var(--border);border-radius:10px;font-size:11px;color:var(--text5)}
 
 /* Modal */
-.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:1000;justify-content:center;align-items:center;padding:20px}
+.mo{display:none;position:fixed;inset:0;background:var(--modal-bg)};backdrop-filter:blur(6px);z-index:1000;justify-content:center;align-items:center;padding:20px}
 .mo.on{display:flex}
-.md{background:#0f172a;border:1px solid #1e293b;border-radius:16px;max-width:980px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.6)}
-.md-h{padding:18px 24px;border-bottom:1px solid #1e293b;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#0f172a;border-radius:16px 16px 0 0;z-index:1}
+.md{background:var(--md-bg);border:1px solid var(--border);border-radius:16px;max-width:980px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.6)}
+.md-h{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--md-bg);border-radius:16px 16px 0 0;z-index:1}
 .md-h h2{font-size:18px;font-weight:600}
-.md-x{background:none;border:none;font-size:22px;cursor:pointer;color:#475569;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:.15s}
-.md-x:hover{background:#1e293b;color:#e2e8f0}
+.md-x{background:none;border:none;font-size:22px;cursor:pointer;color:var(--text5);width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:.15s}
+.md-x:hover{background:var(--border);color:var(--text)}
 .md-b{padding:24px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:20px}
-.sc{background:#111827;border:1px solid #1e293b;border-radius:12px;padding:16px}
-.sc-l{font-size:10px;color:#64748b;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
-.sc-v{font-size:24px;font-weight:700;color:#f1f5f9}
-.sc-r{font-size:11px;color:#64748b;margin-top:6px}
+.sc{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px}
+.sc-l{font-size:10px;color:var(--text4);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+.sc-v{font-size:24px;font-weight:700;color:var(--text)}
+.sc-r{font-size:11px;color:var(--text4);margin-top:6px}
 .bar-w{margin:10px 0}
-.bar-l{display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;margin-bottom:4px}
-.bar-b{height:6px;background:#1e293b;border-radius:3px;overflow:hidden;position:relative}
+.bar-l{display:flex;justify-content:space-between;font-size:10px;color:var(--text3)};margin-bottom:4px}
+.bar-b{height:6px;background:var(--border)};border-radius:3px;overflow:hidden;position:relative}
 .bar-f{height:100%;border-radius:3px;transition:width .5s}
 .bar-f.lo{background:linear-gradient(90deg,#166534,#22c55e)}
 .bar-f.mi{background:linear-gradient(90deg,#78350f,#f59e0b)}
 .bar-f.hi{background:linear-gradient(90deg,#7f1d1d,#ef4444)}
-.bar-p{position:absolute;top:-2px;width:3px;height:10px;background:#f1f5f9;border-radius:2px}
+.bar-p{position:absolute;top:-2px;width:3px;height:10px;background:var(--text)};border-radius:2px}
 .charts{display:flex;flex-direction:column;gap:16px;margin-top:16px}
-.cx{background:#111827;border:1px solid #1e293b;border-radius:12px;padding:18px}
-.cx h4{font-size:13px;margin-bottom:10px;color:#94a3b8;font-weight:500}
+.cx{background:var(--bg2);border:1px solid var(--border)};border-radius:12px;padding:18px}
+.cx h4{font-size:13px;margin-bottom:10px;color:var(--text3)};font-weight:500}
 .cw{position:relative;height:260px}
 .cw.oi{height:180px}
-.no-chart{text-align:center;padding:36px;color:#475569;font-size:13px;background:#111827;border:1px dashed #1e293b;border-radius:12px}
+.no-chart{text-align:center;padding:36px;color:var(--no-chart-color);font-size:13px;background:var(--no-chart-bg);border:1px dashed var(--border);border-radius:12px}
 .cb{display:inline-block;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:700;margin:0 4px}
 .cb-hp{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.25)}
 .cb-mp{background:rgba(245,158,11,.12);color:#fcd34d;border:1px solid rgba(245,158,11,.25)}
@@ -91,15 +91,15 @@ td{border:1px solid #1e293b}
 
 /* Watchlist */
 .wl-section{margin:28px 0 24px}
-.wl-title{font-size:18px;font-weight:600;color:#e2e8f0;margin-bottom:14px}
+.wl-title{font-size:18px;font-weight:600;color:var(--text)};margin-bottom:14px}
 .wl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-.wl-card{background:#111827;border:1px solid #1e293b;border-radius:12px;padding:18px}
-.wl-card-h{font-size:14px;font-weight:600;margin-bottom:4px}
-.wl-card-sub{font-size:11px;color:#64748b;margin-bottom:14px}
+.wl-card{background:var(--bg2);border:1px solid var(--border)};border-radius:12px;padding:18px}
+.wl-card-h{font-size:14px;font-weight:600;margin-bottom:4px;color:var(--text)}
+.wl-card-sub{font-size:11px;color:var(--text4)};margin-bottom:14px}
 .wl-card-list{display:flex;flex-wrap:wrap;gap:5px}
-.wl-empty{color:#334155;font-size:11px;padding:8px}
-.wl-tag-btn{display:inline-block;background:#1e293b;border:1px solid #334155;border-radius:5px;padding:4px 10px;font-size:11px;color:#cbd5e1;font-weight:500;cursor:pointer;transition:.12s;white-space:nowrap}
-.wl-tag-btn:hover{background:#1f6feb;border-color:#1f6feb;color:#fff}
+.wl-empty{color:var(--wl-empty)};font-size:11px;padding:8px}
+.wl-tag-btn{display:inline-block;background:var(--tag-bg);border:1px solid var(--tag-border);border-radius:5px;padding:4px 10px;font-size:11px;color:var(--tag-text);font-weight:500;cursor:pointer;transition:.12s;white-space:nowrap}
+.wl-tag-btn:hover{background:var(--tag-hover-bg);border-color:var(--tag-hover-border);color:#fff}
 .wl-alert-tag{border-color:#3b1111;color:#f87171}
 .wl-alert-tag:hover{background:#7f1d1d;border-color:#ef4444;color:#fff}
 .wl-long{border-top:3px solid #f85149}
@@ -107,7 +107,7 @@ td{border:1px solid #1e293b}
 .wl-bottom{border-top:3px solid #58a6ff}
 .wl-alert{border-top:3px solid #f85149}
 @media(max-width:900px){.wl-grid{grid-template-columns:1fr}}
-</style></head><body><div class="wrap"><h1><span>期货品种加权指数 · 双维分类矩阵</span></h1><div class="sub">上表：历史分位矩阵（全部品种） · 下表：近15日趋势矩阵（50品种有走势数据） · 点击品种查看走势图</div><div class="badges"><span class="badge bg1">📊 65 品种</span><span class="badge bg2">✅ 65 完整双维</span><span class="badge bg3">📈 50 有走势图</span></div><div class="wl-section"><h2 class="wl-title">🎯 重点关注</h2><div class="wl-grid"><div class="wl-card wl-long"><div class="wl-card-h">📈 做多趋势</div><div class="wl-card-sub">量价共振向上</div><div class="wl-card-list"><span class="wl-tag-btn tag" data-code="JD8888.DCE">鸡蛋</span><span class="wl-tag-btn tag" data-code="BU8888.SHF">沥青</span><span class="wl-tag-btn tag" data-code="ZN8888.SHF">沪锌</span></div></div><div class="wl-card wl-short"><div class="wl-card-h">📉 做空趋势</div><div class="wl-card-sub">放量下跌 · 空头确认</div><div class="wl-card-list"><span class="wl-tag-btn tag" data-code="AO8888.SHF">氧化铝</span><span class="wl-tag-btn tag" data-code="PK8888.CZC">花生</span><span class="wl-tag-btn tag" data-code="SM8888.CZC">锰硅</span><span class="wl-tag-btn tag" data-code="RM8888.CZC">菜粕</span><span class="wl-tag-btn tag" data-code="V8888.DCE">PVC</span></div></div><div class="wl-card wl-bottom"><div class="wl-card-h">🔍 底部布局</div><div class="wl-card-sub">历史低价+资金涌入</div><div class="wl-card-list"><span class="wl-tag-btn tag" data-code="BB8888.DCE">胶合板</span><span class="wl-tag-btn tag" data-code="OP8888.SHF">双胶纸</span><span class="wl-tag-btn tag" data-code="SH8888.CZC">烧碱</span><span class="wl-tag-btn tag" data-code="SF8888.CZC">硅铁</span><span class="wl-tag-btn tag" data-code="LH8888.DCE">生猪</span></div></div><div class="wl-card wl-alert"><div class="wl-card-h">⚠️ 风险预警</div><div class="wl-card-sub">高位异动 · 需警惕</div><div class="wl-card-list"><span class="wl-tag-btn wl-alert-tag tag" data-code="PL8888.CZC">丙烯</span><span class="wl-tag-btn wl-alert-tag tag" data-code="CY8888.CZC">棉纱</span><span class="wl-tag-btn wl-alert-tag tag" data-code="BZ8888.DCE">纯苯</span></div></div></div></div><h2 style="margin:28px 0 16px;font-size:18px;font-weight:600;color:#e2e8f0">历史分位矩阵 <span style="font-size:12px;color:#64748b;font-weight:400">—— 全历史极值百分位</span></h2><div class="ins"><div class="ins-card" style="border-top:3px solid #ef4444"><div class="ins-head">⚠️ 拥挤区 <span>2个</span></div><div class="ins-desc">量价双高，关注反转风险</div><div class="ins-names">丙烯 · 苯乙烯</div></div>
+</style></head><body><div class="wrap"><h1><span>期货品种加权指数 · 双维分类矩阵</span></h1><div class="sub">上表：历史分位矩阵（全部品种） · 下表：近15日趋势矩阵（50品种有走势数据） · 点击品种查看走势图</div><div class="badges"><span class="badge bg1">📊 65 品种</span><span class="badge bg2">✅ 65 完整双维</span><span class="badge bg3">📈 50 有走势图</span></div><div class="wl-section"><h2 class="wl-title">🎯 重点关注</h2><div class="wl-grid"><div class="wl-card wl-long"><div class="wl-card-h">📈 做多趋势</div><div class="wl-card-sub">量价共振向上</div><div class="wl-card-list"><span class="wl-tag-btn tag" data-code="JD8888.DCE">鸡蛋</span><span class="wl-tag-btn tag" data-code="BU8888.SHF">沥青</span><span class="wl-tag-btn tag" data-code="ZN8888.SHF">沪锌</span></div></div><div class="wl-card wl-short"><div class="wl-card-h">📉 做空趋势</div><div class="wl-card-sub">放量下跌 · 空头确认</div><div class="wl-card-list"><span class="wl-tag-btn tag" data-code="AO8888.SHF">氧化铝</span><span class="wl-tag-btn tag" data-code="PK8888.CZC">花生</span><span class="wl-tag-btn tag" data-code="SM8888.CZC">锰硅</span><span class="wl-tag-btn tag" data-code="RM8888.CZC">菜粕</span><span class="wl-tag-btn tag" data-code="V8888.DCE">PVC</span></div></div><div class="wl-card wl-bottom"><div class="wl-card-h">🔍 底部布局</div><div class="wl-card-sub">历史低价+资金涌入</div><div class="wl-card-list"><span class="wl-tag-btn tag" data-code="BB8888.DCE">胶合板</span><span class="wl-tag-btn tag" data-code="OP8888.SHF">双胶纸</span><span class="wl-tag-btn tag" data-code="SH8888.CZC">烧碱</span><span class="wl-tag-btn tag" data-code="SF8888.CZC">硅铁</span><span class="wl-tag-btn tag" data-code="LH8888.DCE">生猪</span></div></div><div class="wl-card wl-alert"><div class="wl-card-h">⚠️ 风险预警</div><div class="wl-card-sub">高位异动 · 需警惕</div><div class="wl-card-list"><span class="wl-tag-btn wl-alert-tag tag" data-code="PL8888.CZC">丙烯</span><span class="wl-tag-btn wl-alert-tag tag" data-code="CY8888.CZC">棉纱</span><span class="wl-tag-btn wl-alert-tag tag" data-code="BZ8888.DCE">纯苯</span></div></div></div></div><h2 style="margin:28px 0 16px;font-size:18px;font-weight:600;color:var(--text)">历史分位矩阵 <span style="font-size:12px;color:var(--text4);font-weight:400">—— 全历史极值百分位</span></h2><div class="ins"><div class="ins-card" style="border-top:3px solid #ef4444"><div class="ins-head">⚠️ 拥挤区 <span>2个</span></div><div class="ins-desc">量价双高，关注反转风险</div><div class="ins-names">丙烯 · 苯乙烯</div></div>
 <div class="ins-card" style="border-top:3px solid #22c55e"><div class="ins-head">🔍 底部博弈 <span>8个</span></div><div class="ins-desc">价格低位但资金大量堆积</div><div class="ins-names">焦煤 · 纸浆 · PVC · 烧碱 · 氧化铝 · 花生 等8个</div></div>
 <div class="ins-card" style="border-top:3px solid #f59e0b"><div class="ins-head">📉 弱趋势 <span>2个</span></div><div class="ins-desc">价格高位但缺乏资金跟进</div><div class="ins-names">燃油 · 国际铜</div></div>
 <div class="ins-card" style="border-top:3px solid #64748b"><div class="ins-head">💤 无人区 <span>3个</span></div><div class="ins-desc">量价双杀，等待催化剂</div><div class="ins-names">线材 · 橡胶 · 焦炭</div></div>
@@ -116,7 +116,7 @@ td{border:1px solid #1e293b}
 </div><table><thead><tr><th class="th-corner"><div class="corner-top"><span>→</span> 持仓</div><div class="corner-div">—</div><div class="corner-bot">价格 <span>↓</span></div></th><th><span class="th-emoji">🔴</span><br>持仓量高<br><span class="th-sub">67-100%</span></th><th><span class="th-emoji">🟡</span><br>持仓量中<br><span class="th-sub">33-67%</span></th><th><span class="th-emoji">🟢</span><br>持仓量低<br><span class="th-sub">0-33%</span></th></tr></thead><tbody><tr><td class="td-label" style="background:#3b1111"><span class="td-emoji">🔴</span><br>价格高<br><span class="td-sub">67-100%</span></td><td class="td-cell"><span class="tag ch" data-code="EB8888.DCE" title="苯乙烯 | 价格高位68.3% | 持仓高 90.3% | 📈走势图">苯乙烯</span> <span class="tag ch" data-code="PL8888.CZC" title="丙烯 | 价格高位71.8% | 持仓高 73.7% | 📈走势图">丙烯</span></td><td class="td-cell"><span class="tag ch" data-code="CU8888.SHF" title="沪铜 | 价格高位90.4% | 持仓中 51.3% | 📈走势图">沪铜</span> <span class="tag ch" data-code="SN8888.SHF" title="沪锡 | 价格高位87.4% | 持仓中 62.5% | 📈走势图">沪锡</span> <span class="tag" data-code="AL8888.SHF" title="沪铝 | 价格高位89.2% | 持仓中 64.7%">沪铝</span> <span class="tag ch" data-code="BU8888.SHF" title="沥青 | 价格高位86.0% | 持仓中 38.6% | 📈走势图">沥青</span> <span class="tag ch" data-code="NR8888.INE" title="20号胶 | 价格高位86.9% | 持仓中 52.2% | 📈走势图">20号胶</span> <span class="tag" data-code="AD8888.SHF" title="铝合金 | 价格高位72.3% | 持仓中 55.0%">铝合金</span> <span class="tag ch" data-code="AU8888.SHF" title="沪金 | 价格高位75.7% | 持仓中 41.8% | 📈走势图">沪金</span> <span class="tag ch" data-code="CY8888.CZC" title="棉纱 | 价格高位72.2% | 持仓中 39.3% | 📈走势图">棉纱</span> <span class="tag ch" data-code="BZ8888.DCE" title="纯苯 | 价格高位67.2% | 持仓中 37.7% | 📈走势图">纯苯</span> <span class="tag" data-code="SC8888.INE" title="原油 | 价格高位69.7% | 持仓中 40.5%">原油</span></td><td class="td-cell"><span class="tag ch" data-code="FU8888.SHF" title="燃油 | 价格高位77.7% | 持仓低 15.3% | 📈走势图">燃油</span> <span class="tag" data-code="BC8888.INE" title="国际铜 | 价格高位84.7% | 持仓低 14.9%">国际铜</span></td></tr>
 <tr><td class="td-label" style="background:#3b2e0a"><span class="td-emoji">🟡</span><br>价格中<br><span class="td-sub">33-67%</span></td><td class="td-cell"><span class="tag" data-code="CF8888.CZC" title="棉花 | 价格中位45.7% | 持仓高 67.1%">棉花</span> <span class="tag ch" data-code="M8888.DCE" title="豆粕 | 价格中位51.1% | 持仓高 76.2% | 📈走势图">豆粕</span> <span class="tag ch" data-code="PP8888.DCE" title="聚丙烯 | 价格中位58.0% | 持仓高 83.7% | 📈走势图">聚丙烯</span> <span class="tag ch" data-code="HC8888.SHF" title="热卷 | 价格中位33.8% | 持仓高 85.6% | 📈走势图">热卷</span> <span class="tag ch" data-code="JD8888.DCE" title="鸡蛋 | 价格中位46.0% | 持仓高 86.3% | 📈走势图">鸡蛋</span> <span class="tag ch" data-code="PX8888.CZC" title="对二甲苯 | 价格中位65.1% | 持仓高 67.2% | 📈走势图">对二甲苯</span> <span class="tag ch" data-code="EG8888.DCE" title="乙二醇 | 价格中位35.4% | 持仓高 68.3% | 📈走势图">乙二醇</span> <span class="tag ch" data-code="B8888.DCE" title="豆二 | 价格中位38.4% | 持仓高 76.6% | 📈走势图">豆二</span> <span class="tag ch" data-code="PR8888.CZC" title="瓶片 | 价格中位63.8% | 持仓高 81.1% | 📈走势图">瓶片</span></td><td class="td-cell"><span class="tag" data-code="Y8888.DCE" title="豆油 | 价格中位36.1% | 持仓中 65.6%">豆油</span> <span class="tag ch" data-code="RB8888.SHF" title="螺纹钢 | 价格中位34.2% | 持仓中 41.5% | 📈走势图">螺纹钢</span> <span class="tag" data-code="P8888.DCE" title="棕榈油 | 价格中位60.6% | 持仓中 38.0%">棕榈油</span> <span class="tag ch" data-code="C8888.DCE" title="玉米 | 价格中位64.1% | 持仓中 39.5% | 📈走势图">玉米</span> <span class="tag ch" data-code="SR8888.CZC" title="白糖 | 价格中位54.7% | 持仓中 56.3% | 📈走势图">白糖</span> <span class="tag ch" data-code="OI8888.CZC" title="菜油 | 价格中位46.8% | 持仓中 35.2% | 📈走势图">菜油</span> <span class="tag" data-code="MA8888.CZC" title="甲醇 | 价格中位52.1% | 持仓中 35.5%">甲醇</span> <span class="tag" data-code="A8888.DCE" title="豆一 | 价格中位63.4% | 持仓中 47.8%">豆一</span> <span class="tag ch" data-code="BR8888.SHF" title="合成橡胶 | 价格中位57.5% | 持仓中 55.5% | 📈走势图">合成橡胶</span> <span class="tag ch" data-code="PB8888.SHF" title="沪铅 | 价格中位45.0% | 持仓中 45.9% | 📈走势图">沪铅</span> <span class="tag ch" data-code="I8888.DCE" title="铁矿石 | 价格中位49.6% | 持仓中 34.3% | 📈走势图">铁矿石</span> <span class="tag" data-code="LU8888.INE" title="低硫燃油 | 价格中位64.0% | 持仓中 34.3%">低硫燃油</span> <span class="tag ch" data-code="RR8888.DCE" title="粳米 | 价格中位64.8% | 持仓中 49.4% | 📈走势图">粳米</span></td><td class="td-cell"><span class="tag ch" data-code="NI8888.SHF" title="沪镍 | 价格中位38.0% | 持仓低 31.0% | 📈走势图">沪镍</span> <span class="tag ch" data-code="AG8888.SHF" title="沪银 | 价格中位54.6% | 持仓低 25.1% | 📈走势图">沪银</span> <span class="tag ch" data-code="ZN8888.SHF" title="沪锌 | 价格中位60.1% | 持仓低 27.4% | 📈走势图">沪锌</span> <span class="tag ch" data-code="PF8888.CZC" title="短纤 | 价格中位58.0% | 持仓低 21.4% | 📈走势图">短纤</span> <span class="tag ch" data-code="CS8888.DCE" title="玉米淀粉 | 价格中位55.2% | 持仓低 28.2% | 📈走势图">玉米淀粉</span> <span class="tag" data-code="LG8888.DCE" title="原木 | 价格中位41.4% | 持仓低 27.1%">原木</span> <span class="tag" data-code="FB8888.DCE" title="纤维板 | 价格中位38.8% | 持仓低 28.8%">纤维板</span> <span class="tag ch" data-code="RS8888.CZC" title="菜籽 | 价格中位66.6% | 持仓低 0.2% | 📈走势图">菜籽</span></td></tr>
 <tr><td class="td-label" style="background:#0a2e1a"><span class="td-emoji">🟢</span><br>价格低<br><span class="td-sub">0-33%</span></td><td class="td-cell"><span class="tag ch" data-code="V8888.DCE" title="PVC | 价格低位5.8% | 持仓高 93.7% | 📈走势图">PVC</span> <span class="tag ch" data-code="LH8888.DCE" title="生猪 | 价格低位10.0% | 持仓高 96.5% | 📈走势图">生猪</span> <span class="tag ch" data-code="SP8888.SHF" title="纸浆 | 价格低位19.3% | 持仓高 77.0% | 📈走势图">纸浆</span> <span class="tag ch" data-code="PK8888.CZC" title="花生 | 价格低位12.7% | 持仓高 77.7% | 📈走势图">花生</span> <span class="tag" data-code="FG8888.CZC" title="玻璃 | 价格低位9.4% | 持仓高 73.2%">玻璃</span> <span class="tag ch" data-code="AO8888.SHF" title="氧化铝 | 价格低位6.4% | 持仓高 79.1% | 📈走势图">氧化铝</span> <span class="tag ch" data-code="JM8888.DCE" title="焦煤 | 价格低位20.4% | 持仓高 74.1% | 📈走势图">焦煤</span> <span class="tag ch" data-code="SH8888.CZC" title="烧碱 | 价格低位6.5% | 持仓高 90.8% | 📈走势图">烧碱</span></td><td class="td-cell"><span class="tag ch" data-code="TA8888.CZC" title="PTA | 价格低位32.4% | 持仓中 47.2% | 📈走势图">PTA</span> <span class="tag ch" data-code="L8888.DCE" title="塑料 | 价格低位22.8% | 持仓中 58.3% | 📈走势图">塑料</span> <span class="tag ch" data-code="SM8888.CZC" title="锰硅 | 价格低位26.2% | 持仓中 54.2% | 📈走势图">锰硅</span> <span class="tag ch" data-code="RM8888.CZC" title="菜粕 | 价格低位25.2% | 持仓中 66.0% | 📈走势图">菜粕</span> <span class="tag ch" data-code="SS8888.SHF" title="不锈钢 | 价格低位24.3% | 持仓中 57.1% | 📈走势图">不锈钢</span> <span class="tag ch" data-code="SF8888.CZC" title="硅铁 | 价格低位17.2% | 持仓中 41.7% | 📈走势图">硅铁</span> <span class="tag" data-code="SA8888.CZC" title="纯碱 | 价格低位2.9% | 持仓中 51.0%">纯碱</span> <span class="tag ch" data-code="CJ8888.CZC" title="红枣 | 价格低位6.8% | 持仓中 47.9% | 📈走势图">红枣</span> <span class="tag ch" data-code="UR8888.CZC" title="尿素 | 价格低位18.2% | 持仓中 54.6% | 📈走势图">尿素</span> <span class="tag ch" data-code="OP8888.SHF" title="双胶纸 | 价格低位30.4% | 持仓中 57.5% | 📈走势图">双胶纸</span></td><td class="td-cell"><span class="tag ch" data-code="RU8888.SHF" title="橡胶 | 价格低位30.3% | 持仓低 29.0% | 📈走势图">橡胶</span> <span class="tag" data-code="J8888.DCE" title="焦炭 | 价格低位28.7% | 持仓低 6.2%">焦炭</span> <span class="tag ch" data-code="WR8888.SHF" title="线材 | 价格低位28.2% | 持仓低 1.5% | 📈走势图">线材</span></td></tr>
-</tbody></table><h2 style="margin:32px 0 16px;font-size:18px;font-weight:600;color:#e2e8f0">量价趋势矩阵 <span style="font-size:12px;color:#64748b;font-weight:400">—— 近15交易日</span></h2><div class="ins"><div class="ins-card" style="border-top:3px solid #3fb950"><div class="ins-head">🔥 量价齐升 <span>3个</span></div><div class="ins-desc">量价共振向上，趋势最健康</div><div class="ins-names">鸡蛋 · 沥青 · 沪锌</div></div>
+</tbody></table><h2 style="margin:32px 0 16px;font-size:18px;font-weight:600;color:var(--text)">量价趋势矩阵 <span style="font-size:12px;color:var(--text4);font-weight:400">—— 近15交易日</span></h2><div class="ins"><div class="ins-card" style="border-top:3px solid #3fb950"><div class="ins-head">🔥 量价齐升 <span>3个</span></div><div class="ins-desc">量价共振向上，趋势最健康</div><div class="ins-names">鸡蛋 · 沥青 · 沪锌</div></div>
 <div class="ins-card" style="border-top:3px solid #f0883e;opacity:.4"><div class="ins-head">📤 价升量跌 <span>0个</span></div><div class="ins-desc">暂无品种</div><div class="ins-names">—</div></div>
 <div class="ins-card" style="border-top:3px solid #58a6ff"><div class="ins-head">📥 价跌量升 <span>12个</span></div><div class="ins-desc">价跌仓增，资金逆势布局中</div><div class="ins-names">氧化铝 · 花生 · 锰硅 · 菜粕 · PVC · 纸浆 等12个</div></div>
 <div class="ins-card" style="border-top:3px solid #f85149"><div class="ins-head">❄️ 量价齐跌 <span>8个</span></div><div class="ins-desc">量价共振下行，资金加速离场</div><div class="ins-names">菜籽 · 不锈钢 · 棉纱 · 纯苯 · 对二甲苯 · PTA 等8个</div></div>
