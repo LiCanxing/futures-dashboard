@@ -314,7 +314,7 @@ def build_html(V, H):
             watch_long.append((v['name'], pp, op, t['p_chg'], t['o_chg'], v.get('price_level',''), v.get('oi_level',''), v['code']))
         if t['p_dir'] == '↓' and t['o_dir'] == '↑':
             watch_short.append((v['name'], pp, op, t['p_chg'], t['o_chg'], v.get('price_level',''), v.get('oi_level',''), v['code']))
-        if pp <= 33 and op >= 50 and t['o_dir'] == '↑':
+        if pp <= 33 and op >= 50 and t['o_dir'] == '↑' and not (t['p_dir'] == '↓' and t['o_dir'] == '↑'):
             watch_bottom.append((v['name'], pp, op, t['p_chg'], t['o_chg'], v['code']))
         if pp >= 67 and op >= 50:
             watch_alert.append((v['name'], pp, op, t['p_chg'], t['o_chg'], v.get('price_level',''), v.get('oi_level',''), v['code']))
