@@ -260,7 +260,7 @@ if(pc){{window._pc=new Chart(pc,{{type:'line',data:{{labels:d.pd,datasets:[{{lab
 var oc=document.getElementById('co');
 if(oc&&d.od.length>1){{window._oc=new Chart(oc,{{type:'line',data:{{labels:d.od,datasets:[{{label:'持仓量',data:d.ov,borderColor:'#a78bfa',backgroundColor:'rgba(139,92,246,.06)',fill:true,tension:.3,pointRadius:0,borderWidth:2}}]}},options:{{responsive:true,maintainAspectRatio:false,interaction:{{intersect:false,mode:'index'}},plugins:{{legend:{{position:'bottom',labels:{{boxWidth:12,font:{{size:10}},padding:14,usePointStyle:true}}}}}},scales:{{x:{{ticks:{{maxTicksLimit:8,font:{{size:9}}}},grid:{{color:'rgba(51,65,85,.3)'}}}},y:{{ticks:{{font:{{size:9}}}},grid:{{color:'rgba(51,65,85,.3)'}}}}}}}}}});}}
 }}
-function closeModal(){{document.getElementById('mo').classList.remove('on');if(window._pc){{window._pc.destroy();window._pc=null}}if(window._oc){{window._oc.destroy();window._oc=null}}}}
+function closeModal(){{document.getElementById('mo').classList.remove('on');document.body.style.overflow='';if(window._pc){{window._pc.destroy();window._pc=null}}if(window._oc){{window._oc.destroy();window._oc=null}}}}
 document.getElementById('mo').addEventListener('click',function(e){{if(e.target===this)closeModal()}});
 document.addEventListener('keydown',function(e){{if(e.key==='Escape')closeModal()}});
 </script>'''
