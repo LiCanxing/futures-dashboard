@@ -28,7 +28,13 @@ def load_data():
         c = cmap.get(v['code'], {})
         for k in ['price_level','price_pct','oi_level','oi_pct','oi_min','oi_max']:
             if k not in v: v[k] = c.get(k, 0)
-    return V, H
+    # 计算最新数据日期
+    latest_date = ''
+    for h in H.values():
+        pd = h.get('price_dates', [])
+        if pd and pd[-1][:10] > latest_date:
+            latest_date = pd[-1][:10]
+    return V, H, latest_date
 
 # ─── 趋势计算 ─────────────────────────────────────────────
 def calc_trend(v, H):
@@ -257,7 +263,7 @@ def gen_ai_note(v, H):
     return ' '.join(parts)
 
 # ─── HTML 生成 ────────────────────────────────────────────
-def build_html(V, H):
+def build_html(V, H, latest_date=''):
     notes = {}
     for v in V:
         note = gen_ai_note(v, H)
@@ -348,7 +354,7 @@ def build_html(V, H):
     # 副标题 + 徽章
     H2.append(f'<div class="sub">上表：历史分位矩阵（全部品种） · 下表：近{TREND_DAYS}日趋势矩阵（{nwh}品种有走势数据） · 数据每日更新</div>')
     H2.append(f'<div class="badges"><span class="badge bg1">📊 {len(valid)} 品种</span><span class="badge bg2">✅ {n2} 完整双维</span><span class="badge bg3">📈 {nwh} 有走势图</span>')
-    H2.append(f'<span class="badge bg4">🕐 {datetime.now().strftime("%m-%d %H:%M")}</span></div>')
+    H2.append(f'<span class="badge bg4">🕐 数据更新: {latest_date[:4]}-{latest_date[4:6]}-{latest_date[6:8] if len(latest_date)>=8 else ""}</span></div>')
     
     # ── 重点关注 ──
     H2.append('<div class="wl-section"><h2 class="wl-title">🎯 重点关注</h2><div class="wl-grid">')
@@ -497,8 +503,8 @@ def build_html(V, H):
 
 # ─── 主流程 ───────────────────────────────────────────────
 def main():
-    V, H = load_data()
-    html, notes = build_html(V, H)
+    V, H, latest_date = load_data()
+    html, notes = build_html(V, H, latest_date)
     
     with open(OUTPUT, 'w') as f:
         f.write(html)
