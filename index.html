@@ -44,7 +44,7 @@ td.td-empty{background:var(--td-empty-bg);color:var(--td-empty-color);text-align
 /* 弹窗 */
 .mo{display:none;position:fixed;inset:0;background:var(--modal-bg);backdrop-filter:blur(6px);z-index:1000;justify-content:center;align-items:center;padding:20px}
 .mo.on{display:flex}
-.md{background:var(--md-bg);border:1px solid var(--border);border-radius:16px;width:min(900px,95vw);max-height:90vh;overflow-y:auto}
+.md{background:var(--md-bg);border:1px solid var(--border);border-radius:16px;width:min(900px,95vw);max-height:90vh;overflow-y:auto;overscroll-behavior:contain}
 .md-h{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--md-bg);z-index:1}
 .md-h h2{font-size:16px;color:var(--text)}
 .md-x{background:none;border:none;font-size:22px;cursor:pointer;color:var(--text5);width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:.15s}
@@ -389,7 +389,7 @@ td.td-empty{background:var(--td-empty-bg);color:var(--td-empty-color);text-align
 </td>
 </tr>
 </tbody></table></div>
-<div class="fn">未纳入: 苹果加权、胶合板加权 (API无历史持仓聚合) · 排除: 多晶硅、工业硅、钯、铂、碳酸锂、欧线集运、LPG (新品种/数据缺失) · 数据源: 同花顺hithink + Sina K线 · 更新: 2026-05-23 14:31</div>
+<div class="fn">未纳入: 苹果加权、胶合板加权 (API无历史持仓聚合) · 排除: 多晶硅、工业硅、钯、铂、碳酸锂、欧线集运、LPG (新品种/数据缺失) · 数据源: 同花顺hithink + Sina K线 · 更新: 2026-05-23 14:36</div>
 </div>
 <div class="mo" id="mo"><div class="md"><div class="md-h"><h2 id="mt"></h2><button class="md-x" onclick="closeModal()">✕</button></div><div class="md-b" id="mb"></div></div></div>
 <script>
@@ -425,7 +425,7 @@ window._d={pd:h.price_dates,pv:h.price_values,pMin:Number(pMin),pMax:Number(pMax
 window._hc=true;
 }else{b+='<div class="no-chart">走势图暂不可用<br><small>API配额用完，改天自动补拉</small></div>';window._hc=false;}
 document.getElementById('mb').innerHTML=b;
-document.getElementById('mo').classList.add('on');
+document.getElementById('mo').classList.add('on');document.body.style.overflow='hidden';
 if(window._hc)setTimeout(render,150);
 }
 Chart.defaults.color='#94a3b8';Chart.defaults.borderColor='#1e293b';
