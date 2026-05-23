@@ -102,10 +102,10 @@ td.td-empty{background:var(--td-empty-bg);color:var(--td-empty-color);text-align
 .bar-f{height:100%;border-radius:3px;transition:width .3s}.bar-f.hi{background:#ef4444}.bar-f.mi{background:#f59e0b}.bar-f.lo{background:#22c55e}
 .bar-p{position:absolute;top:-2px;width:3px;height:10px;background:var(--text);border-radius:2px}
 /* 走势图 */
-.charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.charts{display:flex;flex-direction:column;gap:16px;margin-top:16px}
 .cx{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px}
 .cx h4{font-size:13px;margin-bottom:10px;color:var(--text3);font-weight:500}
-.cw{height:220px}.cw.oi{height:260px}
+.cw{height:280px}
 .no-chart{text-align:center;padding:36px;color:var(--no-chart-color);font-size:13px;background:var(--no-chart-bg);border:1px dashed var(--border);border-radius:12px}
 /* 分位便签 */
 .cb-hp{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.25)}

@@ -61,10 +61,10 @@ td.td-empty{background:var(--td-empty-bg);color:var(--td-empty-color);text-align
 .bar-f{height:100%;border-radius:3px;transition:width .3s}.bar-f.hi{background:#ef4444}.bar-f.mi{background:#f59e0b}.bar-f.lo{background:#22c55e}
 .bar-p{position:absolute;top:-2px;width:3px;height:10px;background:var(--text);border-radius:2px}
 /* 走势图 */
-.charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.charts{display:flex;flex-direction:column;gap:16px;margin-top:16px}
 .cx{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px}
 .cx h4{font-size:13px;margin-bottom:10px;color:var(--text3);font-weight:500}
-.cw{height:220px}.cw.oi{height:260px}
+.cw{height:280px}
 .no-chart{text-align:center;padding:36px;color:var(--no-chart-color);font-size:13px;background:var(--no-chart-bg);border:1px dashed var(--border);border-radius:12px}
 /* 分位便签 */
 .cb-hp{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.25)}
@@ -116,7 +116,7 @@ td.td-empty{background:var(--td-empty-bg);color:var(--td-empty-color);text-align
 <span class="ts-icon" id="tsi">🌓</span><span class="ts-label" id="tsl">跟随系统</span></div></div>
 <div class="sub">上表：历史分位矩阵（全部品种） · 下表：近15日趋势矩阵（51品种有走势数据） · 数据每日更新</div>
 <div class="badges"><span class="badge bg1">📊 67 品种</span><span class="badge bg2">✅ 65 完整双维</span><span class="badge bg3">📈 51 有走势图</span>
-<span class="badge bg4">🕐 05-23 14:14</span></div>
+<span class="badge bg4">🕐 05-23 14:15</span></div>
 <div class="wl-section"><h2 class="wl-title">🎯 重点关注</h2><div class="wl-grid">
 <div class="wl-card wl-long"><div class="wl-card-h">🚀 做多趋势</div><div class="wl-card-sub">量价共振向上 · 顺势做多</div><div class="wl-card-list">
 <span class="wl-tag-btn tag" data-code="JD8888.DCE">鸡蛋</span>
@@ -340,7 +340,7 @@ td.td-empty{background:var(--td-empty-bg);color:var(--td-empty-color);text-align
 </td>
 </tr>
 </tbody></table>
-<div class="fn">未纳入: 苹果加权、胶合板加权 (API无历史持仓聚合) · 排除: 多晶硅、工业硅、钯、铂、碳酸锂、欧线集运、LPG (新品种/数据缺失) · 数据源: 同花顺hithink + Sina K线 · 更新: 2026-05-23 14:14</div>
+<div class="fn">未纳入: 苹果加权、胶合板加权 (API无历史持仓聚合) · 排除: 多晶硅、工业硅、钯、铂、碳酸锂、欧线集运、LPG (新品种/数据缺失) · 数据源: 同花顺hithink + Sina K线 · 更新: 2026-05-23 14:15</div>
 </div>
 <div class="mo" id="mo"><div class="md"><div class="md-h"><h2 id="mt"></h2><button class="md-x" onclick="closeModal()">✕</button></div><div class="md-b" id="mb"></div></div></div>
 <script>
