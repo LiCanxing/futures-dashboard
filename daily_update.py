@@ -69,7 +69,7 @@ def pull_klines(dd, varieties):
     pulled = 0
     for v in sorted_v[:DAILY_QUOTA]:
         code = v['code']
-        name = v['name'].replace('加权', '')
+        name = v['name']
         
         # 跳过已排除品种
         EXCLUDED = {'PS8888.GFE','SI8888.GFE','PD8888.GFE','PT8888.GFE',
@@ -77,7 +77,7 @@ def pull_klines(dd, varieties):
         if code in EXCLUDED: continue
         
         try:
-            r = hithink_query(f'{name}期货 历史每日收盘价 持仓量 近90日')
+            r = hithink_query(f'{name} 历史每日收盘价 持仓量 近90日')
             hdata = r.get('datas', [])
             if not hdata:
                 print(f'  {name}: 无数据')
@@ -150,10 +150,10 @@ def update_classification(dd, clf, varieties):
             v['oi_max'] = max(ov)
             v['oi_pct'] = round((ov[-1] - v['oi_min']) / max(v['oi_max'] - v['oi_min'], 1) * 100, 1)
             v['oi_level'] = '高' if v['oi_pct'] >= 67 else ('低' if v['oi_pct'] <= 33 else '中')
-            # 绝对持仓量过滤：OI < 1000 说明合约正在换月/交割，非市场情绪
-            if ov[-1] < 1000:
-                v['oi_level'] = '换月'
-                v['oi_note'] = f'临近交割/换月（仅{ov[-1]:.0f}手）'
+            # 绝对持仓量过滤：OI < 1000 且历史有过高OI → API可能返回了单合约数据
+            if ov[-1] < 1000 and v['oi_max'] > 10000:
+                v['oi_level'] = '数据存疑'
+                v['oi_note'] = f'⚠️ API数据存疑（OI仅{ov[-1]:.0f}手，可能为单合约而非加权指数）'
         
         updated += 1
     

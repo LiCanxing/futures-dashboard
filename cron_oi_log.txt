@@ -1,0 +1,8 @@
+
+Sat May 23 00:02:54 2026: Updated 4/9 varieties
+  棉花加权     P:中 O:高(67.1%)
+  棉纱加权     P:高 O:中(39.3%)
+  LPG加权    P:N/A O:中(62.3%)
+  线材加权     P:低 O:低(1.5%)
+
+Sat May 23 09:00:09 2026: Updated 0/9 varieties
