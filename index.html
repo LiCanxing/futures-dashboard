@@ -108,7 +108,62 @@ td.td-empty{background:var(--td-empty-bg);color:var(--td-empty-color);text-align
 .wl-alert{border-top:3px solid #dc2626}
 /* 底部 */
 .fn{margin-top:20px;padding:14px 18px;background:var(--fn-bg);border:1px solid var(--border);border-radius:10px;font-size:11px;color:var(--text5)}
-@media(max-width:900px){.wl-grid{grid-template-columns:1fr}}
+@media(max-width:900px){
+  .wl-grid{grid-template-columns:1fr}
+  .ins{grid-template-columns:repeat(2,1fr)}
+  .ins-card{border-right:none;border-bottom:1px solid var(--ins-border)}
+  .ins-card:nth-child(odd){border-right:1px solid var(--ins-border)}
+  .stats{grid-template-columns:1fr}
+  .charts{grid-template-columns:1fr}
+  body{padding:12px 8px}
+}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:14px}
+.tbl-wrap table{margin-bottom:0}
+@media(max-width:600px){
+  /* 表格容器允许缩放 */
+  table{font-size:10px;border-radius:8px}
+  th{padding:8px 4px;font-size:10px}
+  th .th-sub{font-size:8px}
+  .th-corner{width:52px}
+  .corner-top,.corner-bot{font-size:8px}
+  .corner-div{font-size:7px}
+  td.td-empty{padding:12px 4px;font-size:10px}
+  .td-cell{padding:4px 2px;min-width:auto}
+  .td-label{font-size:10px;padding:6px 2px}
+  .td-sub{font-size:8px}
+  .td-emoji{font-size:11px}
+  .th-emoji{font-size:11px}
+  .tag{padding:3px 6px;margin:1px;font-size:9px;border-radius:4px}
+  /* 洞察卡 */
+  .ins{grid-template-columns:1fr}
+  .ins-card{border-right:none!important;border-bottom:1px solid var(--ins-border);padding:12px 14px}
+  .ins-card:last-child{border-bottom:none}
+  .ins-head{font-size:13px}
+  .ins-desc{font-size:10px}
+  .ins-names{font-size:9px}
+  /* 弹窗 */
+  .md{width:100vw;max-height:100vh;border-radius:0}
+  .md-h{padding:12px 16px}
+  .md-h h2{font-size:14px}
+  .md-b{padding:12px}
+  .sc{padding:10px 12px}
+  .sc-v{font-size:20px}
+  .stats{gap:8px}
+  .cw{height:200px}
+  /* 标题 */
+  h1{font-size:18px}
+  .sub{font-size:10px}
+  .fn{font-size:10px;padding:10px 12px}
+  /* 重点关注 */
+  .wl-card{padding:12px 14px}
+  .wl-card-h{font-size:13px}
+  .wl-card-sub{font-size:10px}
+  .wl-tag-btn{padding:3px 8px;font-size:10px}
+  /* 主题切换 */
+  .theme-switch{padding:4px 10px;font-size:10px}
+  .ts-icon{font-size:13px}
+  .ts-label{font-size:10px}
+}
 </style></head><body><div class="wrap">
 <div style="display:flex;justify-content:space-between;align-items:flex-start">
 <h1><span>期货品种加权指数 · 双维分类矩阵</span></h1>
@@ -148,7 +203,7 @@ td.td-empty{background:var(--td-empty-bg);color:var(--td-empty-color);text-align
 <div class="ins-card" style="border-top:3px solid #f59e0b"><div class="ins-head">📉 弱趋势 <span>2个</span></div><div class="ins-desc">价格高位但缺乏资金跟进</div><div class="ins-names">燃油 · 国际铜</div></div>
 <div class="ins-card" style="border-top:3px solid #64748b"><div class="ins-head">💤 无人区 <span>3个</span></div><div class="ins-desc">量价双杀，等待催化剂</div><div class="ins-names">线材 · 橡胶 · 焦炭</div></div>
 </div>
-<table><thead><tr>
+<div class="tbl-wrap"><table><thead><tr>
 <th class="th-corner"><div class="corner-top"><span>→</span> 持仓</div><div class="corner-div">—</div><div class="corner-bot">价格 <span>↓</span></div></th>
 <th><span class="th-emoji">🔴</span><br>持仓量高<br><span class="th-sub">67-100%</span></th>
 <th><span class="th-emoji">🟡</span><br>持仓量中<br><span class="th-sub">33-67%</span></th>
@@ -243,7 +298,7 @@ td.td-empty{background:var(--td-empty-bg);color:var(--td-empty-color);text-align
 <span class="tag" data-code="J8888.DCE" title="焦炭 | 价格低位29% | 持仓低 6%">焦炭</span> 
 </td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <h2 style="margin:32px 0 16px;font-size:18px;font-weight:600;color:var(--text)">量价趋势矩阵 <span style="font-size:12px;color:var(--text4);font-weight:400">—— 近15交易日</span></h2>
 <div class="ins">
 <div class="ins-card" style="border-top:3px solid #3fb950"><div class="ins-head">🔥 量价齐升 <span>2个</span></div><div class="ins-desc">量价共振向上，趋势最健康</div><div class="ins-names">鸡蛋 · 沪锡</div></div>
@@ -251,7 +306,7 @@ td.td-empty{background:var(--td-empty-bg);color:var(--td-empty-color);text-align
 <div class="ins-card" style="border-top:3px solid #3b82f6"><div class="ins-head">📥 价跌量增 <span>11个</span></div><div class="ins-desc">跌价但资金涌入，蓄势待发</div><div class="ins-names">焦煤 · 短纤 · 纸浆 等11个</div></div>
 <div class="ins-card" style="border-top:3px solid #64748b"><div class="ins-head">❄️ 量价齐跌 <span>8个</span></div><div class="ins-desc">双杀格局，等待企稳</div><div class="ins-names">PTA · 沪镍 · 对二甲苯 等8个</div></div>
 </div>
-<table><thead><tr>
+<div class="tbl-wrap"><table><thead><tr>
 <th class="th-corner"><div class="corner-top"><span>↑↓</span> 持仓趋势</div><div class="corner-div">—</div><div class="corner-bot">价格趋势 <span>↑↓</span></div></th>
 <th><span class="th-emoji">↑</span><br>持仓上升</th>
 <th><span class="th-emoji">—</span><br>持仓持平</th>
@@ -333,8 +388,8 @@ td.td-empty{background:var(--td-empty-bg);color:var(--td-empty-color);text-align
 <span class="tag ch" data-code="CY8888.CZC" title="棉纱 | 价-2.3% 仓-25.7%">棉纱</span> 
 </td>
 </tr>
-</tbody></table>
-<div class="fn">未纳入: 苹果加权、胶合板加权 (API无历史持仓聚合) · 排除: 多晶硅、工业硅、钯、铂、碳酸锂、欧线集运、LPG (新品种/数据缺失) · 数据源: 同花顺hithink + Sina K线 · 更新: 2026-05-23 14:20</div>
+</tbody></table></div>
+<div class="fn">未纳入: 苹果加权、胶合板加权 (API无历史持仓聚合) · 排除: 多晶硅、工业硅、钯、铂、碳酸锂、欧线集运、LPG (新品种/数据缺失) · 数据源: 同花顺hithink + Sina K线 · 更新: 2026-05-23 14:31</div>
 </div>
 <div class="mo" id="mo"><div class="md"><div class="md-h"><h2 id="mt"></h2><button class="md-x" onclick="closeModal()">✕</button></div><div class="md-b" id="mb"></div></div></div>
 <script>

@@ -155,7 +155,62 @@ td.td-empty{background:var(--td-empty-bg);color:var(--td-empty-color);text-align
 .wl-alert{border-top:3px solid #dc2626}
 /* 底部 */
 .fn{margin-top:20px;padding:14px 18px;background:var(--fn-bg);border:1px solid var(--border);border-radius:10px;font-size:11px;color:var(--text5)}
-@media(max-width:900px){.wl-grid{grid-template-columns:1fr}}
+@media(max-width:900px){
+  .wl-grid{grid-template-columns:1fr}
+  .ins{grid-template-columns:repeat(2,1fr)}
+  .ins-card{border-right:none;border-bottom:1px solid var(--ins-border)}
+  .ins-card:nth-child(odd){border-right:1px solid var(--ins-border)}
+  .stats{grid-template-columns:1fr}
+  .charts{grid-template-columns:1fr}
+  body{padding:12px 8px}
+}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:14px}
+.tbl-wrap table{margin-bottom:0}
+@media(max-width:600px){
+  /* 表格容器允许缩放 */
+  table{font-size:10px;border-radius:8px}
+  th{padding:8px 4px;font-size:10px}
+  th .th-sub{font-size:8px}
+  .th-corner{width:52px}
+  .corner-top,.corner-bot{font-size:8px}
+  .corner-div{font-size:7px}
+  td.td-empty{padding:12px 4px;font-size:10px}
+  .td-cell{padding:4px 2px;min-width:auto}
+  .td-label{font-size:10px;padding:6px 2px}
+  .td-sub{font-size:8px}
+  .td-emoji{font-size:11px}
+  .th-emoji{font-size:11px}
+  .tag{padding:3px 6px;margin:1px;font-size:9px;border-radius:4px}
+  /* 洞察卡 */
+  .ins{grid-template-columns:1fr}
+  .ins-card{border-right:none!important;border-bottom:1px solid var(--ins-border);padding:12px 14px}
+  .ins-card:last-child{border-bottom:none}
+  .ins-head{font-size:13px}
+  .ins-desc{font-size:10px}
+  .ins-names{font-size:9px}
+  /* 弹窗 */
+  .md{width:100vw;max-height:100vh;border-radius:0}
+  .md-h{padding:12px 16px}
+  .md-h h2{font-size:14px}
+  .md-b{padding:12px}
+  .sc{padding:10px 12px}
+  .sc-v{font-size:20px}
+  .stats{gap:8px}
+  .cw{height:200px}
+  /* 标题 */
+  h1{font-size:18px}
+  .sub{font-size:10px}
+  .fn{font-size:10px;padding:10px 12px}
+  /* 重点关注 */
+  .wl-card{padding:12px 14px}
+  .wl-card-h{font-size:13px}
+  .wl-card-sub{font-size:10px}
+  .wl-tag-btn{padding:3px 8px;font-size:10px}
+  /* 主题切换 */
+  .theme-switch{padding:4px 10px;font-size:10px}
+  .ts-icon{font-size:13px}
+  .ts-label{font-size:10px}
+}
 '''
 
 # ─── JS ───────────────────────────────────────────────────
@@ -404,7 +459,7 @@ def build_html(V, H, latest_date=''):
     H2.append('</div>')
     
     # ── 历史分位矩阵表格 ──
-    H2.append('<table><thead><tr>')
+    H2.append('<div class="tbl-wrap"><table><thead><tr>')
     H2.append('<th class="th-corner"><div class="corner-top"><span>→</span> 持仓</div><div class="corner-div">—</div><div class="corner-bot">价格 <span>↓</span></div></th>')
     for ol in ['高','中','低']:
         emoji = {'高':'🔴','中':'🟡','低':'🟢'}[ol]
@@ -431,7 +486,7 @@ def build_html(V, H, latest_date=''):
                 H2.append('<span class="td-empty">—</span>')
             H2.append('</td>')
         H2.append('</tr>')
-    H2.append('</tbody></table>')
+    H2.append('</tbody></table></div>')
     
     # ── 趋势矩阵 ──
     H2.append(f'<h2 style="margin:32px 0 16px;font-size:18px;font-weight:600;color:var(--text)">量价趋势矩阵 <span style="font-size:12px;color:var(--text4);font-weight:400">—— 近{TREND_DAYS}交易日</span></h2>')
@@ -450,7 +505,7 @@ def build_html(V, H, latest_date=''):
     H2.append('</div>')
     
     # 趋势表格
-    H2.append('<table><thead><tr>')
+    H2.append('<div class="tbl-wrap"><table><thead><tr>')
     H2.append('<th class="th-corner"><div class="corner-top"><span>↑↓</span> 持仓趋势</div><div class="corner-div">—</div><div class="corner-bot">价格趋势 <span>↑↓</span></div></th>')
     for od in ['↑','—','↓']:
         H2.append(f'<th><span class="th-emoji">{od}</span><br>持仓{ "上升" if od=="↑" else "持平" if od=="—" else "下降" }</th>')
@@ -471,7 +526,7 @@ def build_html(V, H, latest_date=''):
                 H2.append('<span class="td-empty">—</span>')
             H2.append('</td>')
         H2.append('</tr>')
-    H2.append('</tbody></table>')
+    H2.append('</tbody></table></div>')
     
     # ── 底部注释 ──
     excluded = '多晶硅、工业硅、钯、铂、碳酸锂、欧线集运、LPG'
