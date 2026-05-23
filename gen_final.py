@@ -105,7 +105,7 @@ td.td-empty{background:var(--td-empty-bg);color:var(--td-empty-color);text-align
 /* 分位条 */
 .bar-w{margin-top:12px}.bar-l{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px}
 .bar-b{height:6px;background:var(--border);border-radius:3px;overflow:hidden;position:relative}
-.bar-f{height:100%;border-radius:3px;transition:width .3s}.bar-f.hi{background:#ef4444}.bar-f.mi{background:#f59e0b}.bar-f.lo{background:#22c55e}
+.bar-f{height:100%;border-radius:3px;transition:width .3s}.bar-f.hi{background:#ef4444}.bar-f.mi{background:#f59e0b}.bar-f.lo{background:#22c55e}.bar-f.dl{background:#64748b}
 .bar-p{position:absolute;top:-2px;width:3px;height:10px;background:var(--text);border-radius:2px}
 /* 走势图 */
 .charts{display:flex;flex-direction:column;gap:16px;margin-top:16px}
@@ -120,6 +120,8 @@ td.td-empty{background:var(--td-empty-bg);color:var(--td-empty-color);text-align
 .cb-ho{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.25)}
 .cb-mo{background:rgba(245,158,11,.12);color:#fcd34d;border:1px solid rgba(245,158,11,.25)}
 .cb-lo{background:rgba(34,197,94,.12);color:#86efac;border:1px solid rgba(34,197,94,.25)}
+.cb-dl{background:rgba(100,116,139,.12);color:#94a3b8;border:1px solid rgba(100,116,139,.25)}
+.cb-na{background:rgba(100,116,139,.08);color:#64748b;border:1px solid rgba(100,116,139,.15)}
 /* AI观察 */
 .ai-note{background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(139,92,246,.06));border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:13px;line-height:1.7;color:var(--text3)}
 .ai-badge{display:inline-block;background:rgba(59,130,246,.15);color:#60a5fa;border-radius:5px;padding:2px 10px;font-size:11px;font-weight:600;margin-bottom:8px}
@@ -226,7 +228,7 @@ var v=V[c];if(!v)return;
 document.getElementById('mt').textContent=v.name;
 var pl=v.price_level||'N/A',pc=pl==='高'?'#fca5a5':pl==='中'?'#fcd34d':pl==='低'?'#86efac':'#94a3b8',pcl=pl==='高'?'cb-hp':pl==='中'?'cb-mp':'cb-lp';
 var pMin=v.price_min||0,pMax=v.price_max||1,pPct=Math.min(100,v.price_pct||0);
-var ol=v.oi_level||'N/A',oc=ol==='高'?'#fca5a5':ol==='中'?'#fcd34d':ol==='低'?'#86efac':'#94a3b8',ocl=ol==='高'?'cb-ho':ol==='中'?'cb-mo':'cb-lo',om=!ol||ol==='N/A';
+var ol=v.oi_level||'N/A',oc=ol==='高'?'#fca5a5':ol==='中'?'#fcd34d':ol==='低'?'#86efac':ol==='换月'?'#94a3b8':'#94a3b8',ocl=ol==='高'?'cb-ho':ol==='中'?'cb-mo':ol==='低'?'cb-lo':ol==='换月'?'cb-dl':'cb-na',om=!ol||ol==='N/A';
 var oMin=v.oi_min||0,oMax=v.oi_max||1,oPct=Math.min(100,v.oi_pct||0);
 var b='';
 var ai=_N[c]||'';
@@ -237,7 +239,7 @@ b+='<div class="bar-w"><div class="bar-l"><span>低点</span><span>'+pPct+'% · 
 b+='<div class="sc"><div class="sc-l">当前持仓量</div><div class="sc-v">'+Number(v.cur_oi||0).toLocaleString()+' 手</div>';
 if(om){{b+='<div class="sc-r" style="color:#f59e0b">历史持仓区间暂无</div>';}}
 else{{b+='<div class="sc-r">历史: '+Number(oMin||0).toLocaleString()+' ~ '+Number(oMax||0).toLocaleString()+'</div>';
-b+='<div class="bar-w"><div class="bar-l"><span>低点</span><span>'+oPct+'% · <b style="color:'+oc+'">'+ol+'位</b></span><span>高点</span></div><div class="bar-b"><div class="bar-f '+(ol==='高'?'hi':ol==='中'?'mi':'lo')+'" style="width:'+oPct+'%"></div><div class="bar-p" style="left:'+oPct+'%"></div></div></div>';}}
+b+='<div class="bar-w"><div class="bar-l"><span>低点</span><span>'+oPct+'% · <b style="color:'+oc+'">'+ol+'位</b></span><span>高点</span></div><div class="bar-b"><div class="bar-f '+(ol==='高'?'hi':ol==='中'?'mi':ol==='换月'?'dl':'lo')+'" style="width:'+oPct+'%"></div><div class="bar-p" style="left:'+oPct+'%"></div></div></div>';}}
 b+='</div><div class="sc"><div class="sc-l">定位</div><div class="sc-v" style="font-size:16px">价格<span class="'+pcl+'">'+pl+'位</span> · 持仓<span class="'+ocl+'">'+(om?'待补':ol+'位')+'</span></div><div class="sc-r">'+v.name+'</div></div></div>';
 var h=H[c];
 if(h&&h.price_dates&&h.price_dates.length>1){{
@@ -275,6 +277,7 @@ def gen_ai_note(v, H):
         return ''
     pp = v.get('price_pct', 50)
     op = v.get('oi_pct', 50)
+    ol = v.get('oi_level', '')
     
     p15 = (pv[-1] - pv[-16]) / pv[-16] * 100 if pv[-16] > 0 else 0
     o15 = (ov[-1] - ov[-16]) / ov[-16] * 100 if ov and len(ov) > 16 and ov[-16] > 0 else 0
@@ -305,7 +308,9 @@ def gen_ai_note(v, H):
     else:
         parts.append(f"当前价格处于历史{pp:.0f}%中位。")
     
-    if op >= 67:
+    if ol == '换月':
+        parts.append(f"合约临近交割/换月，持仓量已降至{v.get('cur_oi',0):.0f}手，非市场情绪信号。")
+    elif op >= 67:
         parts.append(f"持仓量处于历史{op:.0f}%高位，市场博弈激烈。")
     elif op <= 33:
         parts.append(f"持仓量处于历史{op:.0f}%低位，市场关注度不足。")
@@ -331,7 +336,7 @@ def build_html(V, H, latest_date=''):
     
     # 有效品种筛选
     valid = [v for v in V if v.get('price_pct', 0) > 0 or v.get('price_level')]
-    n2 = sum(1 for v in valid if v.get('oi_level') and v.get('oi_level') != 'N/A')
+    n2 = sum(1 for v in valid if v.get('oi_level') in ['高','中','低'])
     nwh = sum(1 for v in V if v['code'] in H and H[v['code']].get('price_dates'))
     
     # ── 历史分位矩阵 ──
@@ -356,11 +361,12 @@ def build_html(V, H, latest_date=''):
             v['_trend'] = t
             trend_cells[(t['p_dir'], t['o_dir'])].append(v)
     
-    # ── 洞察卡 ──
+    # ── 洞察卡 ──（排除换月品种）
     crowd   = [v for v in valid if v.get('price_level')=='高' and v.get('oi_level')=='高']
     bottom  = [v for v in valid if v.get('price_level')=='低' and v.get('oi_level')=='高']
     weak    = [v for v in valid if v.get('price_level')=='高' and v.get('oi_level')=='低']
     nobody  = [v for v in valid if v.get('price_level')=='低' and v.get('oi_level')=='低']
+    rolling = [v for v in valid if v.get('oi_level')=='换月']  # 换月/交割中
     
     # ── 重点关注 ──
     watch_long  = []  # 量价齐升：价↑+仓↑
@@ -389,6 +395,7 @@ def build_html(V, H, latest_date=''):
     lo_p = [v for v in valid if v.get('price_level')=='低']
     hi_o = [v for v in valid if v.get('oi_level')=='高']
     lo_o = [v for v in valid if v.get('oi_level')=='低']
+    ro_o = [v for v in valid if v.get('oi_level')=='换月']
     
     # ── 组装 HTML ──
     H2 = []
@@ -456,6 +463,8 @@ def build_html(V, H, latest_date=''):
     H2.append(make_ins('🔍', '底部博弈', '价格低位但资金大量堆积', bottom, '#22c55e', len(bottom)))
     H2.append(make_ins('📉', '弱趋势', '价格高位但缺乏资金跟进', weak, '#f59e0b', len(weak)))
     H2.append(make_ins('💤', '无人区', '量价双杀，等待催化剂', nobody, '#64748b', len(nobody)))
+    if rolling:
+        H2.append(make_ins('🔄', '换月/交割', '持仓归零→合约到期，非市场信号', rolling, '#8b5cf6', len(rolling)))
     H2.append('</div>')
     
     # ── 历史分位矩阵表格 ──
@@ -531,7 +540,7 @@ def build_html(V, H, latest_date=''):
     # ── 底部注释 ──
     excluded = '多晶硅、工业硅、钯、铂、碳酸锂、欧线集运、LPG'
     missing_oi = '苹果加权、胶合板加权'
-    H2.append(f'<div class="fn">未纳入: {missing_oi} (API无历史持仓聚合) · 排除: {excluded} (新品种/数据缺失) · 数据源: 同花顺hithink + Sina K线 · 更新: {datetime.now().strftime("%Y-%m-%d %H:%M")}</div>')
+    H2.append(f'<div class="fn">未纳入: {missing_oi} (API无历史持仓聚合) · 排除: {excluded} (新品种/数据缺失) · 换月中: {len(rolling)}品种 (鸡蛋/生猪/乙二醇等) · 数据源: 同花顺hithink + Sina K线 · 更新: {datetime.now().strftime("%Y-%m-%d %H:%M")}</div>')
     H2.append('</div>')
     
     # ── 弹窗 ──
