@@ -20,12 +20,13 @@ def load_data():
     with open(DATA_FILE) as f:   d = json.load(f)
     V = d['varieties']
     H = d['historical']
-    # 合并分类数据到品种
     cmap = {v['code']: v for v in clf}
+    EXCLUDED = {'PS8888.GFE','SI8888.GFE','PD8888.GFE','PT8888.GFE','LC8888.GFE','EC8888.INE','PG8888.DCE'}
+    V = [v for v in V if v['code'] not in EXCLUDED]
     for v in V:
+        v['name'] = v.get('name','').replace('加权','')
         c = cmap.get(v['code'], {})
-        for v in V: v['name'] = v.get('name','').replace('加权','')
-    for k in ['price_level','price_pct','oi_level','oi_pct','oi_min','oi_max']:
+        for k in ['price_level','price_pct','oi_level','oi_pct','oi_min','oi_max']:
             if k not in v: v[k] = c.get(k, 0)
     return V, H
 
