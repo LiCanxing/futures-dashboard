@@ -2,27 +2,31 @@
 # -*- coding: utf-8 -*-
 """
 期货看板每日更新流水线
-基于 API 配额限制（≈50-60次/天），优先更新高持仓活跃品种
+每天拉取全部商品期货加权指数的上市以来全量历史数据，生成看板并推送。
 
 流程：
-  Phase 1: 拉取 Top-N 品种最新K线（优先高持仓）
-  Phase 2: 更新分类数据（最新价/持仓/分位）
-  Phase 3: 运行 gen_final.py 重新生成看板
-  Phase 4: git commit + push
+  1. 检测数据文件 → 缺失时自动全量重建
+  2. 逐个拉取所有品种全量历史数据（配额耗尽自动停）
+  3. 更新价格/持仓分位
+  4. 运行 gen_final.py 生成看板
+  5. git commit + push
 """
 
 import json, secrets, urllib.request, time, os, sys, subprocess
 from datetime import datetime
 
 # ─── 配置 ─────────────────────────────────────────────────
-WORK = os.path.expanduser('~/.qclaw/workspace-futures-assistant')
-API_KEY = os.environ.get('IWENCAI_API_KEY', '')
-BASE_URL = 'https://openapi.iwencai.com/v1/query2data'
-DATA_FILE = '/tmp/futures_dashboard_data.json'
-CLASS_FILE = '/tmp/futures_classification_v3.json'
+WORK      = os.path.expanduser('~/.qclaw/workspace-futures-assistant')
+DATA_DIR  = os.path.join(WORK, 'data')
+API_KEY   = os.environ.get('IWENCAI_API_KEY', '')
+BASE_URL  = 'https://openapi.iwencai.com/v1/query2data'
+DATA_FILE = os.path.join(DATA_DIR, 'dashboard_data.json')
+CLASS_FILE = os.path.join(DATA_DIR, 'classification.json')
 
-# 配额限制：每天更新品种数
-DAILY_QUOTA = 50  # 每天最多调用次数（配额用尽自动停）
+EXCLUDED = {
+    'PS8888.GFE','SI8888.GFE','PD8888.GFE','PT8888.GFE',  # 广期所新品种
+    'LC8888.GFE','EC8888.INE','PG8888.DCE',                # 数据缺失
+}
 
 # ─── API ──────────────────────────────────────────────────
 def hithink_query(q, skill='hithink-futures-query'):
@@ -43,44 +47,40 @@ def hithink_query(q, skill='hithink-futures-query'):
     with urllib.request.urlopen(req, timeout=30) as resp:
         return json.loads(resp.read().decode('utf-8'))
 
-# ─── 数据加载 ─────────────────────────────────────────────
+# ─── 数据加载/保存 ────────────────────────────────────────
 def load_data():
+    os.makedirs(DATA_DIR, exist_ok=True)
     with open(DATA_FILE) as f: dd = json.load(f)
     with open(CLASS_FILE) as f: clf = json.load(f)
     return dd, clf
 
 def save_data(dd):
+    os.makedirs(DATA_DIR, exist_ok=True)
     with open(DATA_FILE, 'w') as f:
         json.dump(dd, f, ensure_ascii=False)
     with open(CLASS_FILE, 'w') as f:
         json.dump(clf_dict, f, ensure_ascii=False)
 
-# ─── Phase 1: 拉取 K 线 ──────────────────────────────────
-def pull_klines(dd, varieties):
-    """按持仓量排序，优先拉取高持仓品种的最近数据"""
+# ─── Phase 1: 拉取全量历史 K 线 ────────────────────────────
+def pull_all_klines(dd, varieties):
+    """逐个拉取所有品种上市以来全量历史数据，配额耗尽自动停止"""
     hist = dd.get('historical', {})
+    pulled, skipped, errors = 0, 0, 0
     
-    # 按 OI 分位排序（高→中→低），OI 数据缺失的排最后
-    level_order = {'高': 0, '中': 1, '低': 2}
-    sorted_v = sorted(varieties, 
-                      key=lambda v: (level_order.get(v.get('oi_level', '低'), 9), 
-                                    -(v.get('oi_pct', 0))))
-    
-    pulled = 0
-    for v in sorted_v[:DAILY_QUOTA]:
+    for v in varieties:
         code = v['code']
         name = v['name']
         
-        # 跳过已排除品种
-        EXCLUDED = {'PS8888.GFE','SI8888.GFE','PD8888.GFE','PT8888.GFE',
-                    'LC8888.GFE','EC8888.INE','PG8888.DCE'}
-        if code in EXCLUDED: continue
+        if code in EXCLUDED or code.endswith('.CFE'):
+            skipped += 1
+            continue
         
         try:
-            r = hithink_query(f'{name} 历史每日收盘价 持仓量 近90日')
+            r = hithink_query(f'{name} 历史每日收盘价 持仓量')
             hdata = r.get('datas', [])
             if not hdata:
-                print(f'  {name}: 无数据')
+                print(f'  {name}: 无数据 (跳过)')
+                skipped += 1
                 continue
             
             item = hdata[0]
@@ -96,9 +96,9 @@ def pull_klines(dd, varieties):
             
             price_pts.sort(); oi_pts.sort()
             
-            # 合并到历史数据（新数据覆盖旧的）
             if not price_pts and not oi_pts:
-                print(f'  {name}: 解析失败')
+                print(f'  {name}: 解析失败 (跳过)')
+                skipped += 1
                 continue
             
             if price_pts:
@@ -112,7 +112,7 @@ def pull_klines(dd, varieties):
             
             pulled += 1
             print(f'  {name}: {len(price_pts)}价/{len(oi_pts)}仓 ✓')
-            time.sleep(0.35)  # 避免触发限流
+            time.sleep(0.35)
             
         except Exception as e:
             err = str(e)
@@ -120,14 +120,14 @@ def pull_klines(dd, varieties):
                 print(f'  ⛔ 配额耗尽，已拉取 {pulled} 个品种')
                 break
             print(f'  {name}: ERROR - {err[:60]}')
+            errors += 1
             time.sleep(0.5)
     
     dd['historical'] = hist
-    return pulled
+    return pulled, skipped, errors
 
-# ─── Phase 2: 更新分类数据 ────────────────────────────────
+# ─── Phase 2: 更新分位数据 ────────────────────────────────
 def update_classification(dd, clf, varieties):
-    """用最新K线数据更新价格/持仓分位"""
     hist = dd.get('historical', {})
     updated = 0
     
@@ -150,14 +150,12 @@ def update_classification(dd, clf, varieties):
             v['oi_max'] = max(ov)
             v['oi_pct'] = round((ov[-1] - v['oi_min']) / max(v['oi_max'] - v['oi_min'], 1) * 100, 1)
             v['oi_level'] = '高' if v['oi_pct'] >= 67 else ('低' if v['oi_pct'] <= 33 else '中')
-            # 绝对持仓量过滤：OI < 1000 且历史有过高OI → API可能返回了单合约数据
             if ov[-1] < 1000 and v['oi_max'] > 10000:
                 v['oi_level'] = '数据存疑'
                 v['oi_note'] = f'⚠️ API数据存疑（OI仅{ov[-1]:.0f}手，可能为单合约而非加权指数）'
         
         updated += 1
     
-    # 同步到分类文件
     for cv in clf:
         code = cv['code']
         vv = {v['code']: v for v in varieties}.get(code)
@@ -171,7 +169,6 @@ def update_classification(dd, clf, varieties):
 
 # ─── Phase 3+4: 生成看板 + 推送 ──────────────────────────
 def rebuild_and_push():
-    """运行 gen_final.py 然后 git push"""
     gen_path = os.path.join(WORK, 'gen_final.py')
     if not os.path.exists(gen_path):
         print(f'❌ gen_final.py not found at {gen_path}')
@@ -183,7 +180,6 @@ def rebuild_and_push():
         print(f'❌ gen_final.py failed:\n{result.stderr}')
         return False
     
-    # Git push
     dt_str = datetime.now().strftime("%m-%d %H:%M")
     cmds = [
         f'cd {WORK} && cp futures_dashboard.html index.html',
@@ -202,45 +198,48 @@ def rebuild_and_push():
 def main():
     global clf_dict
     print(f'📊 期货看板每日更新 — {datetime.now().strftime("%Y-%m-%d %H:%M")}')
-    print(f'配额: 每天最多 {DAILY_QUOTA} 次API调用')
     
     if not API_KEY:
-        print('❌ IWENCAI_API_KEY 未设置')
-        # 仍然尝试重建（用现有数据）
-        print('用现有数据重建看板...')
+        print('❌ IWENCAI_API_KEY 未设置，用现有数据重建看板...')
         rebuild_and_push()
         return
     
+    # 数据文件缺失 → 全量重建
+    if not os.path.exists(DATA_FILE):
+        print('⚠️ 数据文件缺失，触发全量重建...')
+        rebuild_script = os.path.join(WORK, 'rebuild_futures_data.py')
+        if os.path.exists(rebuild_script):
+            r = subprocess.run(['python3', rebuild_script], capture_output=True, text=True, cwd=WORK)
+            print(r.stdout.strip())
+            if r.returncode != 0:
+                print(f'❌ 重建失败:\n{r.stderr}')
+                return
+        else:
+            print(f'❌ 重建脚本不存在: {rebuild_script}')
+            return
+    
     dd, clf_dict = load_data()
     varieties = dd['varieties']
+    active = [v for v in varieties if v['code'] not in EXCLUDED and not v['code'].endswith('.CFE')]
+    print(f'品种: {len(active)} 个 | 有K线: {len(dd.get("historical", {}))} 个')
     
-    # 排除新品种
-    EXCLUDED = {'PS8888.GFE','SI8888.GFE','PD8888.GFE','PT8888.GFE',
-                'LC8888.GFE','EC8888.INE','PG8888.DCE'}
-    active = [v for v in varieties if v['code'] not in EXCLUDED]
+    # Phase 1+2: 拉取全量数据 + 更新分位
+    print(f'\n📥 拉取全量历史数据（上市以来）...')
+    pulled, skipped, errors = pull_all_klines(dd, active)
+    print(f'拉取: {pulled} | 跳过: {skipped} | 错误: {errors}')
     
-    hist_count = len(dd.get('historical', {}))
-    print(f'活跃品种: {len(active)} | 有K线: {hist_count}')
-    
-    # Phase 1: 拉K线
-    print(f'\n📥 Phase 1: 按持仓优先级拉取K线（最多{DAILY_QUOTA}次API调用）...')
-    pulled = pull_klines(dd, active)
-    print(f'成功拉取: {pulled} 个品种')
-    
-    # Phase 2: 更新分类
-    print(f'\n📊 Phase 2: 更新分位数据...')
+    print(f'\n📊 更新分位数据...')
     updated = update_classification(dd, clf_dict, active)
     print(f'更新: {updated} 个品种')
     
-    # 保存
     save_data(dd)
     print('数据已保存')
     
-    # Phase 3+4: 重建 + 推送
-    print(f'\n🔨 Phase 3+4: 重建看板 + 推送...')
+    # Phase 3+4: 看板 + 推送
+    print(f'\n🔨 生成看板 + 推送...')
     success = rebuild_and_push()
     
-    print(f'\n{"✅ 完成" if success else "⚠️ 部分完成"}'  )
+    print(f'\n{"✅ 完成" if success else "⚠️ 部分完成"}（拉取 {pulled}/{len(active)} 个）')
 
 if __name__ == '__main__':
     main()

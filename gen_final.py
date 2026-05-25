@@ -6,8 +6,9 @@ import json, os, sys
 from datetime import datetime
 
 # ─── 配置 ─────────────────────────────────────────────────
-CLASS_FILE = '/tmp/futures_classification_v3.json'
-DATA_FILE  = '/tmp/futures_dashboard_data.json'
+DATA_DIR   = os.path.expanduser('~/.qclaw/workspace-futures-assistant/data')
+CLASS_FILE = os.path.join(DATA_DIR, 'classification.json')
+DATA_FILE  = os.path.join(DATA_DIR, 'dashboard_data.json')
 OUTPUT     = os.path.expanduser('~/.qclaw/workspace-futures-assistant/futures_dashboard.html')
 
 PRICE_TREND_THRESH = 2.0   # 价格趋势阈值 (%)
@@ -22,7 +23,8 @@ def load_data():
     H = d['historical']
     cmap = {v['code']: v for v in clf}
     EXCLUDED = {'PS8888.GFE','SI8888.GFE','PD8888.GFE','PT8888.GFE','LC8888.GFE','EC8888.INE','PG8888.DCE'}
-    V = [v for v in V if v['code'] not in EXCLUDED]
+    # 排除中金所金融期货（股指+国债）+ 广期所新品种 + 特定品种
+    V = [v for v in V if v['code'] not in EXCLUDED and not v['code'].endswith('.CFE')]
     for v in V:
         v['name'] = v.get('name','').replace('加权','')
         c = cmap.get(v['code'], {})
@@ -155,6 +157,9 @@ td.td-empty{background:var(--td-empty-bg);color:var(--td-empty-color);text-align
 .wl-short{border-top:3px solid #f59e0b}
 .wl-bottom{border-top:3px solid #2563eb}
 .wl-alert{border-top:3px solid #dc2626}
+.wl-start{border-top:3px solid #22c55e}
+.wl-go{border-top:3px solid #3b82f6}
+.wl-dip{border-top:3px solid #f59e0b}
 /* 底部 */
 .fn{margin-top:20px;padding:14px 18px;background:var(--fn-bg);border:1px solid var(--border);border-radius:10px;font-size:11px;color:var(--text5)}
 @media(max-width:900px){
@@ -243,8 +248,8 @@ b+='<div class="bar-w"><div class="bar-l"><span>低点</span><span>'+oPct+'% · 
 b+='</div><div class="sc"><div class="sc-l">定位</div><div class="sc-v" style="font-size:16px">价格<span class="'+pcl+'">'+pl+'位</span> · 持仓<span class="'+ocl+'">'+(om?'待补':ol+'位')+'</span></div><div class="sc-r">'+v.name+'</div></div></div>';
 var h=H[c];
 if(h&&h.price_dates&&h.price_dates.length>1){{
-b+='<div class="charts"><div class="cx"><h4>近一年价格走势</h4><div class="cw"><canvas id="cp"></canvas></div></div>';
-if(h.oi_dates&&h.oi_dates.length>1)b+='<div class="cx"><h4>近一年持仓量走势</h4><div class="cw oi"><canvas id="co"></canvas></div></div>';
+b+='<div class="charts"><div class="cx"><h4>历史价格走势</h4><div class="cw"><canvas id="cp"></canvas></div></div>';
+if(h.oi_dates&&h.oi_dates.length>1)b+='<div class="cx"><h4>历史持仓量走势</h4><div class="cw oi"><canvas id="co"></canvas></div></div>';
 b+='</div>';
 window._d={{pd:h.price_dates,pv:h.price_values,pMin:Number(pMin),pMax:Number(pMax),od:h.oi_dates||[],ov:h.oi_values||[],oMin:Number(oMin),oMax:Number(oMax)}};
 window._hc=true;
@@ -368,27 +373,39 @@ def build_html(V, H, latest_date=''):
     nobody  = [v for v in valid if v.get('price_level')=='低' and v.get('oi_level')=='低']
     suspect = [v for v in valid if v.get('oi_level')=='数据存疑']  # API数据质量问题
     
-    # ── 重点关注 ──
-    watch_long  = []  # 量价齐升：价↑+仓↑
-    watch_short = []  # 下跌蓄势：价↓+仓↑
-    watch_bottom = [] # 底部布局：价低+仓高
-    watch_alert  = [] # 风险预警：价高+仓高+近期异动
+    # ── 重点关注（趋势 × 历史分位 双层筛选）──
+    # 低位启动：价↑+仓↑ + 价格低分位(≤33%)
+    # 趋势延续：价↑+仓↑ + 价格中分位(33-67%)
+    # 下跌蓄势：价↓+仓↑ + 价格非高分位(<67%)
+    # 高位预警：价格高分位(≥67%) + 持仓高分位(≥50%)
+    watch_start  = []  # 低位启动
+    watch_go     = []  # 趋势延续
+    watch_dip    = []  # 下跌蓄势
+    watch_alert  = []  # 高位预警
     for v in V:
         t = v.get('_trend')
-        if not t: continue
         pp, op = v.get('price_pct',50), v.get('oi_pct',50)
-        if t['p_dir'] == '↑' and t['o_dir'] == '↑':
-            watch_long.append((v['name'], pp, op, t['p_chg'], t['o_chg'], v.get('price_level',''), v.get('oi_level',''), v['code']))
-        if t['p_dir'] == '↓' and t['o_dir'] == '↑':
-            watch_short.append((v['name'], pp, op, t['p_chg'], t['o_chg'], v.get('price_level',''), v.get('oi_level',''), v['code']))
-        if pp <= 33 and op >= 50 and t['o_dir'] == '↑' and not (t['p_dir'] == '↓' and t['o_dir'] == '↑'):
-            watch_bottom.append((v['name'], pp, op, t['p_chg'], t['o_chg'], v['code']))
+        pl = v.get('price_level','')
+        ol_v = v.get('oi_level','')
+        entry = (v['name'], pp, op, t['p_chg'] if t else 0, t['o_chg'] if t else 0, pl, ol_v, v['code'])
+        
+        if t:
+            if t['p_dir'] == '↑' and t['o_dir'] == '↑':
+                if pp <= 33:
+                    watch_start.append(entry)   # 低位启动：底部趋势确认
+                elif pp <= 67:
+                    watch_go.append(entry)      # 趋势延续：中位量价共振
+                # pp > 67 → 归入高位预警（不追高）
+            if t['p_dir'] == '↓' and t['o_dir'] == '↑' and pp < 67:
+                watch_dip.append(entry)         # 下跌蓄势：排除高位派发
+        
         if pp >= 67 and op >= 50:
-            watch_alert.append((v['name'], pp, op, t['p_chg'], t['o_chg'], v.get('price_level',''), v.get('oi_level',''), v['code']))
+            watch_alert.append(entry)           # 高位预警：价格高+持仓高
     
-    watch_short.sort(key=lambda x: x[4], reverse=True)
-    watch_bottom.sort(key=lambda x: x[4], reverse=True)
-    watch_alert.sort(key=lambda x: x[1], reverse=True)
+    watch_start.sort(key=lambda x: x[4], reverse=True)  # 持仓增幅降序
+    watch_go.sort(key=lambda x: x[4], reverse=True)
+    watch_dip.sort(key=lambda x: x[4], reverse=True)
+    watch_alert.sort(key=lambda x: x[1], reverse=True)  # 价格分位降序
     
     # ── 分布栏 ──
     hi_p = [v for v in valid if v.get('price_level')=='高']
@@ -419,30 +436,31 @@ def build_html(V, H, latest_date=''):
     H2.append(f'<span class="badge bg4">🕐 数据更新: {latest_date[:4]}-{latest_date[4:6]}-{latest_date[6:8] if len(latest_date)>=8 else ""}</span></div>')
     
     # ── 重点关注 ──
-    H2.append('<div class="wl-section"><h2 class="wl-title">🎯 重点关注</h2><div class="wl-grid">')
+    H2.append('<div class="wl-section"><h2 class="wl-title">🎯 重点关注（趋势 × 历史分位）</h2><div class="wl-grid">')
     
-    # 做多趋势
-    H2.append('<div class="wl-card wl-long"><div class="wl-card-h">🚀 做多趋势</div><div class="wl-card-sub">量价共振向上 · 顺势做多</div><div class="wl-card-list">')
-    for name, pp, op, pc, oc, pl, ol, cd in watch_long[:5]:
+    # 低位启动
+    H2.append('<div class="wl-card wl-start"><div class="wl-card-h">🔥 低位启动</div><div class="wl-card-sub">底部趋势确认 · 最强做多信号</div><div class="wl-card-list">')
+    for name, pp, op, pc, oc, pl, ol, cd in watch_start[:5]:
         H2.append(f'<span class="wl-tag-btn tag" data-code="{cd}">{name}</span>')
-    if not watch_long: H2.append('<div class="wl-empty">暂无</div>')
+    if not watch_start: H2.append('<div class="wl-empty">暂无品种</div>')
+    H2.append('</div></div>')
+    
+    # 趋势延续
+    H2.append('<div class="wl-card wl-go"><div class="wl-card-h">📈 趋势延续</div><div class="wl-card-sub">量价共振向上 · 趋势中继</div><div class="wl-card-list">')
+    for name, pp, op, pc, oc, pl, ol, cd in watch_go[:5]:
+        H2.append(f'<span class="wl-tag-btn tag" data-code="{cd}">{name}</span>')
+    if not watch_go: H2.append('<div class="wl-empty">暂无品种</div>')
     H2.append('</div></div>')
     
     # 下跌蓄势
-    H2.append('<div class="wl-card wl-short"><div class="wl-card-h">📉 下跌蓄势</div><div class="wl-card-sub">价格回调 · 资金吸筹</div><div class="wl-card-list">')
-    for name, pp, op, pc, oc, pl, ol, cd in watch_short[:5]:
+    H2.append('<div class="wl-card wl-dip"><div class="wl-card-h">📉 下跌蓄势</div><div class="wl-card-sub">价格回调+资金吸筹 · 排除高位派发</div><div class="wl-card-list">')
+    for name, pp, op, pc, oc, pl, ol, cd in watch_dip[:5]:
         H2.append(f'<span class="wl-tag-btn tag" data-code="{cd}">{name}</span>')
-    if not watch_short: H2.append('<div class="wl-empty">暂无品种</div>')
+    if not watch_dip: H2.append('<div class="wl-empty">暂无品种</div>')
     H2.append('</div></div>')
     
-    # 底部布局
-    H2.append('<div class="wl-card wl-bottom"><div class="wl-card-h">🔍 底部布局</div><div class="wl-card-sub">历史低价+资金涌入 · 反转观察</div><div class="wl-card-list">')
-    for name, pp, op, pc, oc, cd in watch_bottom[:6]:
-        H2.append(f'<span class="wl-tag-btn tag" data-code="{cd}">{name}</span>')
-    H2.append('</div></div>')
-    
-    # 风险预警
-    H2.append('<div class="wl-card wl-alert"><div class="wl-card-h">⚠️ 风险预警</div><div class="wl-card-sub">高位异动 · 需警惕</div><div class="wl-card-list">')
+    # 高位预警
+    H2.append('<div class="wl-card wl-alert"><div class="wl-card-h">⚠️ 高位预警</div><div class="wl-card-sub">历史高位+资金拥挤 · 关注反转</div><div class="wl-card-list">')
     for name, pp, op, pc, oc, pl, ol, cd in watch_alert[:6]:
         H2.append(f'<span class="wl-tag-btn wl-alert-tag tag" data-code="{cd}">{name}</span>')
     H2.append('</div></div>')
