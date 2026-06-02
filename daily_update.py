@@ -180,6 +180,14 @@ def rebuild_and_push():
         print(f'❌ gen_final.py failed:\n{result.stderr}')
         return False
     
+    # 注入基本面跟踪 Tab
+    inj_path = os.path.join(WORK, 'inject_fundamentals.py')
+    if os.path.exists(inj_path):
+        result = subprocess.run(['python3', inj_path], capture_output=True, text=True, cwd=WORK)
+        print(result.stdout.strip())
+        if result.returncode != 0:
+            print(f'⚠️ inject_fundamentals.py failed:\n{result.stderr}')
+    
     dt_str = datetime.now().strftime("%m-%d %H:%M")
     cmds = [
         f'cd {WORK} && cp futures_dashboard.html index.html',
