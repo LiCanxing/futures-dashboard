@@ -86,10 +86,14 @@ def compute_seasonal(dates, prices):
     monthly = defaultdict(list)
     for i in range(20, len(dates)):
         month = dates[i][4:6]
+        if prices[i-20] == 0 or prices[i] == 0:
+            continue  # 跳过脏数据
         ret = (prices[i] / prices[i-20]) - 1
         monthly[month].append(ret * 100)
     result = {}
     for m, rets in sorted(monthly.items()):
+        if not rets:
+            continue
         win = sum(1 for r in rets if r > 0)
         result[m] = {'avg': round(sum(rets)/len(rets), 2), 'win_rate': round(win/len(rets)*100, 1), 'count': len(rets)}
     return result
