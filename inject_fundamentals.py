@@ -5,7 +5,7 @@
 在 gen_final.py 生成看板后运行，将基本面分析和双Tab结构注入 HTML。
 """
 
-import json, os, sys
+import json, os, re, sys
 from collections import defaultdict
 
 WORK = os.path.dirname(os.path.abspath(__file__))
@@ -381,14 +381,19 @@ def inject_into_html():
     prefix = prefix.replace('期货品种加权指数 · 双维分类矩阵', '期货品种看板')
     
     # Tabs
-    old_sub = '上表：历史分位矩阵（全部品种） · 下表：近15日趋势矩阵（45品种有走势数据） · 数据每日更新</div>'
-    new_sub = '<div class="tabs">\n<button class="tab-btn active" onclick="switchTab(\'matrix\')">📊 双维分类</button>\n<button class="tab-btn" onclick="switchTab(\'fundamentals\')">📈 基本面跟踪</button>\n</div>\n</div>'
-    prefix = prefix.replace(old_sub, new_sub)
-    prefix = prefix.replace('数据更新: 2026-05-26', f'数据更新: {fd["updated_at"]}')
+    # 用正则匹配动态品种子符和日期，避免硬编码失效
+    sub_re = re.compile(r'(<div class="sub">上表：历史分位矩阵.*?</div>)')
+    m = sub_re.search(prefix)
+    if m:
+        old_sub = m.group(1)
+        new_sub = '<div class="tabs">\n<button class="tab-btn active" onclick="switchTab(\'matrix\')">📊 双维分类</button>\n<button class="tab-btn" onclick="switchTab(\'fundamentals\')">📈 基本面跟踪</button>\n</div>\n</div>'
+        prefix = prefix.replace(m.group(1), old_sub.replace('</div>', '') + new_sub)
+    # 修复日期（用正则匹配任意日期）
+    prefix = re.sub(r'数据更新: \d{4}-\d{2}-\d{2}', f'数据更新: {fd["updated_at"]}', prefix)
     
     # Wrap matrix
     matrix = '<div class="tab-content active" id="tab-matrix">\n' + matrix
-    matrix = matrix.replace('更新: 2026-05-26', f'更新: {fd["updated_at"]}')
+    matrix = re.sub(r'更新: \d{4}-\d{2}-\d{2}', f'更新: {fd["updated_at"]}', matrix)
     
     # Fundamentals tab
     ft_html = '</div>\n<div class="tab-content" id="tab-fundamentals">\n<div class="ft-header">\n<div><span style="font-size:18px;font-weight:600;color:var(--text)">📊 基本面跟踪</span>\n<span class="ft-date"> · 数据更新: ' + fd['updated_at'] + '</span></div>\n<div class="ft-actions">\n<button class="ft-btn" onclick="var gs=document.querySelectorAll(\'.cat-group\');gs.forEach(function(g){g.classList.add(\'open\')})">展开全部</button>\n<button class="ft-btn" onclick="var gs=document.querySelectorAll(\'.cat-group\');gs.forEach(function(g){g.classList.remove(\'open\')})">收起全部</button>\n</div></div>\n<div id="ft-container"><div class="no-chart">点击「展开全部」加载基本面数据</div></div>\n</div>\n\n'
