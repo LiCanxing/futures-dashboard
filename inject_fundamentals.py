@@ -105,7 +105,15 @@ def gen_fundamentals():
     
     varieties = db['varieties']
     historical = db['historical']
-    today = db.get('updated_at', '2026-06-02')
+    # 从全量历史数据计算最新交易日（与gen_final.py一致）
+    today = db.get('updated_at', '')
+    if not today:
+        latest = ''
+        for h in historical.values():
+            pd = h.get('price_dates', [])
+            if pd and pd[-1] > latest:
+                latest = pd[-1]
+        today = f'{latest[:4]}-{latest[4:6]}-{latest[6:8]}' if len(latest) >= 8 else '2026-06-02'
     
     output = {"updated_at": today, "varieties": {}}
     
