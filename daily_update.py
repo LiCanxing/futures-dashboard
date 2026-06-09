@@ -102,16 +102,27 @@ def pull_all_klines(dd, varieties):
                 continue
             
             if price_pts:
-                hist[code] = hist.get(code, {})
+                hist.setdefault(code, {})
                 hist[code]['price_dates'] = [x[0] for x in price_pts]
                 hist[code]['price_values'] = [x[1] for x in price_pts]
+            
+            # OI 数据质量检查：新 OI 峰值远低于现有数据 → 可能是单合约而非加权指数
+            oi_ok = True
             if oi_pts:
-                hist[code] = hist.get(code, {})
-                hist[code]['oi_dates'] = [x[0] for x in oi_pts]
-                hist[code]['oi_values'] = [x[1] for x in oi_pts]
+                new_oi_max = max(x[1] for x in oi_pts)
+                old_oi = hist.get(code, {}).get('oi_values', [])
+                old_oi_max = max(old_oi) if old_oi else 0
+                if old_oi_max > 0 and new_oi_max < old_oi_max * 0.25:
+                    oi_ok = False
+                    print(f'  {name}: {len(price_pts)}价/{len(oi_pts)}仓 ⚠️ OI存疑(新{new_oi_max:.0f} vs 旧{old_oi_max:.0f}) 保留旧OI')
+                else:
+                    hist.setdefault(code, {})
+                    hist[code]['oi_dates'] = [x[0] for x in oi_pts]
+                    hist[code]['oi_values'] = [x[1] for x in oi_pts]
             
             pulled += 1
-            print(f'  {name}: {len(price_pts)}价/{len(oi_pts)}仓 ✓')
+            if oi_ok:
+                print(f'  {name}: {len(price_pts)}价/{len(oi_pts)}仓 ✓')
             time.sleep(0.35)
             
         except Exception as e:
