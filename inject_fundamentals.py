@@ -137,8 +137,10 @@ def gen_fundamentals():
         oi_t = '震荡'
         chg30oi = chg60oi = 0
         if len(oi_vals) >= 30:
-            chg30oi = (oi_vals[-1] / oi_vals[-min(30,len(oi_vals))] - 1) * 100
-            chg60oi = (oi_vals[-1] / oi_vals[-min(60,len(oi_vals))] - 1) * 100
+            base30 = oi_vals[-min(30,len(oi_vals))]
+            base60 = oi_vals[-min(60,len(oi_vals))]
+            chg30oi = (oi_vals[-1] / base30 - 1) * 100 if base30 != 0 else 0
+            chg60oi = (oi_vals[-1] / base60 - 1) * 100 if base60 != 0 else 0
             recent5 = oi_vals[-5:]
             if all(recent5[i] >= recent5[i-1] for i in range(1, len(recent5))):
                 oi_t = '持续流入'
@@ -154,13 +156,17 @@ def gen_fundamentals():
         yr_high = yr_low = p_cur
         
         if len(prices) >= 60:
-            mom5 = round((prices[-1]/prices[-min(5,len(prices))]-1)*100, 1)
-            mom20 = round((prices[-1]/prices[-min(20,len(prices))]-1)*100, 1)
-            mom60 = round((prices[-1]/prices[-min(60,len(prices))]-1)*100, 1)
+            def safe_mom(prices, lookback):
+                idx = -min(lookback, len(prices))
+                prev = prices[idx]
+                return round((prices[-1]/prev - 1)*100, 1) if prev != 0 else 0
+            mom5 = safe_mom(prices, 5)
+            mom20 = safe_mom(prices, 20)
+            mom60 = safe_mom(prices, 60)
             yr_prices = [p for p, d in zip(prices, dates) if d.startswith('2026')]
             yr_high = max(yr_prices) if yr_prices else p_cur
             yr_low = min(yr_prices) if yr_prices else p_cur
-            if yr_prices:
+            if yr_prices and yr_prices[0] != 0:
                 ytd = round((prices[-1]/yr_prices[0]-1)*100, 1)
         
         sw = cur_seasonal['win_rate']
@@ -224,7 +230,7 @@ def gen_fundamentals():
             l2_desc = f"当前价格{p_cur:.0f}处于历史{pp:.0f}%极低分位，距历史最低{vdata.get('price_min',0):.0f}仅{((p_cur/vdata.get('price_min',1))-1)*100:.0f}%空间。"
             l2_desc += "低位有资金吸筹迹象，底部特征正在累积。" if chg30oi > 0 else "但资金尚未明显流入，底部确认需等待量价配合。"
         elif pp < 30:
-            l2_desc = f"当前价格{p_cur:.0f}处于历史{pp:.0f}%低位区间，年内高点{yr_high:.0f}（距当前+{((yr_high/p_cur-1)*100):.0f}%），存在均值回归空间。当前已反映较多悲观预期。"
+            l2_desc = f"当前价格{p_cur:.0f}处于历史{pp:.0f}%低位区间，年内高点{yr_high:.0f}（距当前+{((yr_high/p_cur-1)*100):.0f}%），存在均值回归空间。当前已反映较多悲观预期。" if p_cur > 0 else f"当前价格{p_cur:.0f}处于历史{pp:.0f}%低位区间。当前已反映较多悲观预期。"
         elif pp > 85:
             l2_desc = f"当前价格{p_cur:.0f}处于历史{pp:.0f}%极高分位，逼近历史最高{vdata.get('price_max',0):.0f}。"
             l2_desc += "持仓同步下降，高位资金撤退信号需高度警惕。" if chg30oi < 0 else "但持仓未明显下降，高位博弈需严控仓位。"
@@ -271,7 +277,7 @@ def gen_fundamentals():
                     {'label': '最新价', 'value': f"{p_cur:.0f}", 'source': '9'},
                     {'label': '历史分位', 'value': f"{pp:.0f}%（{'极低位' if pp<15 else '低位' if pp<33 else '中位' if pp<67 else '高位' if pp<85 else '极高位'}）", 'source': '0'},
                     {'label': '历史区间', 'value': f"{vdata.get('price_min',0):.0f}~{vdata.get('price_max',0):.0f}", 'source': '0'},
-                    {'label': '年内高点', 'value': f"{yr_high:.0f}（距当前+{((yr_high/p_cur-1)*100):.0f}%）" if yr_high > p_cur else '—', 'source': '0'},
+                    {'label': '年内高点', 'value': f"{yr_high:.0f}（距当前+{((yr_high/p_cur-1)*100):.0f}%）" if yr_high > p_cur and p_cur > 0 else '—', 'source': '0'},
                 ]
             },
             'layer3': {
